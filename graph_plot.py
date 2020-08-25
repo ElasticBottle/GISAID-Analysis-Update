@@ -49,9 +49,37 @@ plt.show()
 
 #%%
 df = pd.read_csv(
-    r"./data/input_sample/clade_progression.tsv",
-    sep="\t",
-    skiprows=1,
-    index_col="Month",
+    r"./data/input_sample/clade_progression.tsv", sep="\t", skiprows=1, index_col=0,
 )
-df.head()
+indiv_df = df.loc[:"Cumulative:", :].iloc[:-1]
+indiv_df = indiv_df.astype(float)
+hor_sum = indiv_df.sum(axis=1)
+df_percentage = indiv_df.div(hor_sum, axis=0) * 100
+
+# cum_df = df.loc["Month":, :].iloc[1:]
+# cum_df = cum_df.astype(float)
+
+values = [None] * 7
+insert_order = {
+    "O": 0,
+    "S": 1,
+    "L": 2,
+    "V": 3,
+    "G": 4,
+    "GH": 5,
+    "GR": 6,
+}
+for label, value in df_percentage.items():
+    values[insert_order.get(label, 0)] = value
+pal = ["#f291ee"]
+plt.stackplot(
+    df_percentage.index,
+    *values,
+    labels=sorted(df.columns, key=lambda x: insert_order.get(x, 0)),
+)
+y_ticks = list(map(lambda x: f"{x:.0f}%", np.arange(110, step=10)))
+plt.yticks(
+    ticks=np.arange(110, step=10), labels=y_ticks,
+)
+plt.margins(0.0)
+plt.legend(ncol=7, loc="lower center", bbox_to_anchor=(0.5, -0.3))
