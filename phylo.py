@@ -171,6 +171,8 @@ class PhyloIMG:
         return tree
 
     def __call__(self, output: str, dpi: int = 300, width: int = 15000):
+        ext = output[-4:]
+        self.tree.write(format=3, outfile=output.replace(ext, ".nwk"))
         self.tree.render(output, dpi=dpi, w=width, tree_style=tree_style())
 
 
@@ -190,7 +192,7 @@ def _parse_args():
         dest="out",
         metavar="",
         default="./out.png",
-        help="The output path of the image to be stored. Default ./out.png",
+        help="The output path of the image to be stored. Default ./out.png. Script assumes extension is 3 letters long, .png, .svg etc.",
     )
     parser.add_argument(
         "-d",
