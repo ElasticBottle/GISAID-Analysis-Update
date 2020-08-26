@@ -167,12 +167,10 @@ class PhyloIMG:
             if test and i == 5:
                 break
         self._root_on_s(tree)
-        tree.write(format=3, outfile="test.nwk")
         return tree
 
     def __call__(self, output: str, dpi: int = 300, width: int = 15000):
         ext = output[-4:]
-        self.tree.write(format=3, outfile=output.replace(ext, ".nwk"))
         self.tree.render(output, dpi=dpi, w=width, tree_style=tree_style())
 
 
