@@ -18,7 +18,7 @@ begin figtree;
 	set branchLabels.significantDigits=4;
 	set layout.expansion=0;
 	set layout.layoutType="POLAR";
-	set layout.zoom=0;
+	set layout.zoom=20;
 	set legend.attribute=null;
 	set legend.fontSize=10.0;
 	set legend.isShown=false;
