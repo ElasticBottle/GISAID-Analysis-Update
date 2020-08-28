@@ -73,3 +73,5 @@ Due to confidentiality, I am unable to release the test files used to test the c
 ### utils: .tar file extractor
 
 `python extractor.py input_tar_file.tar output_folder` in the dir of the tool.
+
+Will create a new folder if the folder path does not exist.
