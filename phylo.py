@@ -1,5 +1,6 @@
 from ete3 import Tree, TreeNode, TreeStyle, NodeStyle
 from typing import Union, Tuple, Dict, List, Iterable
+import numpy as np
 from collections import defaultdict
 import argparse
 
@@ -70,6 +71,7 @@ class PhyloIMG:
             "O_": [],
         }
         self.leaf_clade_group = {}  # taxon_name -> clade
+        self.node_info = {}  # node -> num_descendants, num_leaves
         self.tree = self.get_tree(self.file, test=False)
 
     def _update_clades(self, clade: str, node: TreeNode):
@@ -138,21 +140,60 @@ class PhyloIMG:
             count[self.leaf_clade_group[child.name]] += 1
         return max(count, key=count.get)
 
-    def _color_clade(self, n: TreeNode):
+    def find_num_nodes(self, tree: TreeNode) -> Dict[str, int]:
+        """
+        Finds the total number of node per clade
+        """
+        num_clade = {}
+        for leaf in tree.iter_leaf_names():
+            clade, _ = self._get_clade_color(leaf)
+            num_clade[clade] = num_clade.get(clade, 0) + 1
+        return num_clade
+
+    def calculate_density(self, node: TreeNode, clade: str) -> float:
+        """
+        Calculate the percentage of [clade] for a given [node]
+        """
+        node_per_clade = self.find_num_nodes(node)
+        node_count = np.sum(list(node_per_clade.values()))
+        # print(
+        #     node_per_clade, node_count, node_per_clade[clade] / node_count * 100,
+        # )
+        return node_per_clade[clade] / node_count * 100
+
+    def max_ancestor(self, tree: TreeNode, clade: str, clade_total: int):
+        """
+        For each unique clade
+            traverse the tree top find the internal node with the highest proportion of said clade, provided that it encompasses more than half of the said clade groups.
+        Example:
+        {'GH': 947, 'O_': 304, 'G_': 887, 'S_': 186, 'GR': 1402, 'L_': 77, 'V_': 108}
+
+        For GH, find the internal node where:
+            - 473.5 < GH < 947, and the proportion of GH to other clade is the highest
+        """
+        min_size = clade_total // 2
+        node_density = {}
+        for leaf in tree.traverse():
+            if leaf.is_leaf() or leaf.is_root():
+                continue
+            if self.find_num_nodes(leaf).get(clade, 0) >= min_size:
+                density = self.calculate_density(leaf, clade)
+                node_density[leaf] = density
+        sorted_nodes = sorted(node_density.keys(), key=node_density.get)
+        max_node = sorted_nodes[-1]
+        return (max_node, node_density[max_node])
+
+    def _color_clades(self, tree: TreeNode):
         """
         Sets the ['bgcolor'] of a node's [img_style] to be the appropriate color based on which clade group appears most frequently
 
         Args:
             n(TreeNode) - The node whose background color is to be set
         """
-        if n.is_leaf() or n.is_root():
-            return
-        clade = self._get_majority_clade(n.iter_leaves())
-        if clade == "G_" or clade == "GH" or clade == "GR":
-            ancestors = n.get_ancestors()
-            if len(ancestors) > 2:
-                clade = self._get_majority_clade(n.up.up.iter_leaves())
-        n.img_style = node_bg_style(n.img_style, clade)
+        nodes_per_clade = self.find_num_nodes(tree)
+        for clade in self.clades_list:
+            node, density = self.max_ancestor(tree, clade, nodes_per_clade[clade])
+            node.img_style = node_bg_style(node.img_style, clade)
 
     def get_tree(self, file: str, test: bool = False) -> Tree:
         """
@@ -162,15 +203,11 @@ class PhyloIMG:
 
         for i, n in enumerate(tree.iter_leaves()):
             self._color_node(n)
-        for i, n in enumerate(tree.traverse()):
-            self._color_clade(n)
-            if test and i == 5:
-                break
         self._root_on_s(tree)
+        self._color_clades(tree)
         return tree
 
     def __call__(self, output: str, dpi: int = 300, width: int = 15000):
-        ext = output[-4:]
         self.tree.render(output, dpi=dpi, w=width, tree_style=tree_style())
 
 
@@ -209,13 +246,14 @@ def _parse_args():
         dest="width",
         help="Specifies the width of the image in pixel, the height is then automatically derived. Default 15000",
     )
+
     args = parser.parse_args()
     return args
 
 
 def main():
     args = _parse_args()
-    img = PhyloIMG(file=args.file,)
+    img = PhyloIMG(file=args.file)
     print("generating image, this will take a while. ~2-5 mins")
     img(
         output=args.out, dpi=args.dpi, width=args.width,
