@@ -1,8 +1,11 @@
-from ete3 import Tree, TreeNode, TreeStyle, NodeStyle
-from typing import Union, Tuple, Dict, List, Iterable
-import numpy as np
-from collections import defaultdict
 import argparse
+import time
+from collections import defaultdict
+from typing import Dict, Iterable, List, Tuple, Union
+
+import numpy as np
+
+from ete3 import NodeStyle, Tree, TreeNode, TreeStyle
 
 
 def tree_style() -> TreeStyle:
@@ -10,15 +13,14 @@ def tree_style() -> TreeStyle:
     style.mode = "c"  # draw tree in circular mode
     # style.scale = 20
     # style.branch_vertical_margin = 15
+    style.root_opening_factor = 0.035
     style.show_leaf_name = False
     style.show_branch_length = False
     style.show_branch_support = False
     return style
 
 
-def node_style(
-    clade: str, color: str, is_leaf: bool, bg_color: str = None,
-) -> NodeStyle:
+def node_style(color: str = None) -> NodeStyle:
 
     style = NodeStyle()
     style["fgcolor"] = "#0f0f0f"
@@ -28,8 +30,8 @@ def node_style(
     style["hz_line_color"] = color if color is not None else "#000000"
     style["vt_line_type"] = 0  # 0 solid, 1 dashed, 2 dotted
     style["hz_line_type"] = 0
-    style["vt_line_width"] = 20
-    style["hz_line_width"] = 20
+    style["vt_line_width"] = 0
+    style["hz_line_width"] = 0
     return style
 
 
@@ -52,7 +54,7 @@ def node_bg_style(style: Dict, clade: str, bg_color: str = None):
 class PhyloIMG:
     def __init__(self, file: str):
         self.file = file
-        self.clades_list = [
+        self.clade_list = [
             "G_",
             "GH",
             "GR",
@@ -69,27 +71,43 @@ class PhyloIMG:
             "V_": [],
             "L_": [],
             "O_": [],
-        }
-        self.leaf_clade_group = {}  # taxon_name -> clade
-        self.node_info = {}  # node -> num_descendants, num_leaves
-        self.tree = self.get_tree(self.file, test=False)
+        }  # clade -> taxons
+        self.leaf_clade_group = {}  # taxon_name -> clade CURRENTLY NOT USED
+        self.colored_nodes = (
+            []
+        )  # list of internal nodes whose bgcolor has been changed CURRENTLY NOT USED
+        self.nodes_per_clade = {}  # internal_node -> number of leaves in each clade
+        self.tree = self.get_tree(self.file)
 
-    def _update_clades(self, clade: str, node: TreeNode):
+    def get_tree(self, file: str) -> Tree:
         """
-        Update [self.clades] and [self.leaf_clade_group] with the taxon and clade respectively
-        
+        Creates a newick tree where leafs are colored base on the tag in name, and background base on the clade grouping.
+
         Args:
-            - clade(str): The clade of the taxonomy
-            - node(TreeNode): The node to be updated
+            - file(str): the path to the newick tree
         """
-        clade_list = self.clades.get(clade, self.clades["O_"])
-        clade_list.append(node.name)
-        if clade in self.clades_list:
-            self.clades[clade] = clade_list
-            self.leaf_clade_group[node.name] = clade
-        else:
-            self.clades["O_"] = clade_list
-            self.leaf_clade_group[node.name] = "O_"
+        tree = Tree(newick=file)
+        self._set_node_style(tree)
+        self._root_on_s(tree)
+        self._color_clades(tree)
+        return tree
+
+    def _set_node_style(self, tree: TreeNode):
+        """
+        Sets the node style for all nodes in the tree
+        """
+        for n in tree.traverse():
+            n.img_style = node_style()
+            if n.is_leaf():
+                self._color_node(n)
+
+    def _color_node(self, n: TreeNode):
+        """
+        Sets the NodeStyle for [n] and updates the clades dictionary
+        """
+        clade, color = self._get_clade_color(n.name)
+        n.img_style = node_style(color)
+        self._update_clades(clade, n)
 
     def _get_clade_color(self, name: str) -> Tuple[str, Union[str, None]]:
         """
@@ -108,104 +126,133 @@ class PhyloIMG:
             color = name_color[1][:-2]
         return (clade, color)
 
-    def _color_node(self, n: TreeNode):
+    def _update_clades(self, clade: str, node: TreeNode):
         """
-        Sets the NodeStyle for [n] and updates the clades dictionary
+        Update [self.clades] and [self.leaf_clade_group] with the taxon and clade respectively
+        
+        Args:
+            - clade(str): The clade of the taxonomy
+            - node(TreeNode): The node to be updated
         """
-        clade, color = self._get_clade_color(n.name)
-        n.img_style = node_style(clade, color, n.is_leaf())
-        self._update_clades(clade, n)
+        clade_group = self.clades.get(clade, self.clades["O_"])
+        clade_group.append(node.name)
+        if clade in self.clade_list:
+            self.clades[clade] = clade_group
+            self.leaf_clade_group[node.name] = clade
+        else:
+            self.clades["O_"] = clade_group
+            self.leaf_clade_group[node.name] = "O_"
 
     def _root_on_s(self, tree: TreeNode):
-        """
-        Roots the tree base on clade S
-        """
-        s_ancestor = tree.get_common_ancestor(*self.clades["S_"])
+        s_ancestor, _ = self.max_ancestor(
+            tree, "S_", len(self.clades["S_"]), coverage=0.6, rooting=True
+        )
         tree.set_outgroup(s_ancestor)
 
-    def _get_majority_clade(self, children: Iterable) -> str:
+    def find_num_nodes(self, node: TreeNode) -> Dict[str, int]:
         """
-        Finds the clade group occuring in the largest quantity from a particular node
+        Finds the total number of taxons in each clade from [node]
 
         Args:
-            -children (Iterable): The leaf from the particular node of interest to search
-
-        Returns:
-            str: the clade that occurs most frequently
-        """
-        count = defaultdict(int)
-        for child in children:
-            if not child.is_leaf():
-                continue
-            count[self.leaf_clade_group[child.name]] += 1
-        return max(count, key=count.get)
-
-    def find_num_nodes(self, tree: TreeNode) -> Dict[str, int]:
-        """
-        Finds the total number of node per clade
+            - node(TreeNode): The node assumed to be the root
         """
         num_clade = {}
-        for leaf in tree.iter_leaf_names():
+        for leaf in node.iter_leaf_names():
             clade, _ = self._get_clade_color(leaf)
             num_clade[clade] = num_clade.get(clade, 0) + 1
         return num_clade
 
-    def calculate_density(self, node: TreeNode, clade: str) -> float:
+    def calculate_density(self, node_per_clade: Dict[str, int], clade: str) -> float:
         """
         Calculate the percentage of [clade] for a given [node]
         """
-        node_per_clade = self.find_num_nodes(node)
         node_count = np.sum(list(node_per_clade.values()))
         # print(
-        #     node_per_clade, node_count, node_per_clade[clade] / node_count * 100,
+        #     node_per_clade, node_per_clade[clade] / node_count * 100,
         # )
         return node_per_clade[clade] / node_count * 100
 
-    def max_ancestor(self, tree: TreeNode, clade: str, clade_total: int):
+    def max_ancestor(
+        self,
+        tree: TreeNode,
+        clade: str,
+        clade_total: int,
+        coverage: float = 0.6,
+        rooting: bool = False,
+    ) -> Tuple[TreeNode, float]:
         """
-        For each unique clade
-            traverse the tree top find the internal node with the highest proportion of said clade, provided that it encompasses more than half of the said clade groups.
+        Finds the internal node which captures [coverage] of taxons from [clade] and returns the node with the highest density of taxons from [clade]
+       
         Example:
+        Tree has clade distribution of:
         {'GH': 947, 'O_': 304, 'G_': 887, 'S_': 186, 'GR': 1402, 'L_': 77, 'V_': 108}
 
-        For GH, find the internal node where:
-            - 473.5 < GH < 947, and the proportion of GH to other clade is the highest
+        For clade GH, with coverage of 0.5, find the internal nodes where:
+            - 473.5 < Number of taxons belonging to GH < 947 (clade total)
+        Return the internal node where proportion of GH to other clade is the highest
         """
-        min_size = clade_total // 2
-        node_density = {}
+        min_size = coverage * clade_total
+        node_details = {}  # node -> density of [clade]
         for leaf in tree.traverse():
             if leaf.is_leaf() or leaf.is_root():
                 continue
-            if self.find_num_nodes(leaf).get(clade, 0) >= min_size:
-                density = self.calculate_density(leaf, clade)
-                node_density[leaf] = density
-        sorted_nodes = sorted(node_density.keys(), key=node_density.get)
+
+            # Saving calculations to prevent extra calculations
+            node_per_clade = self.nodes_per_clade.get(leaf, None)
+            if node_per_clade is None:
+                node_per_clade = self.find_num_nodes(leaf)
+                if not rooting:
+                    self.nodes_per_clade[leaf] = node_per_clade
+
+            # Finding internal nodes that satisfy coverage criteria
+            if node_per_clade.get(clade, 0) >= min_size:
+                density = self.calculate_density(node_per_clade, clade)
+                node_details[leaf] = (density, node_per_clade)
+
+        # Retrieving the node with densest collection of [clade]
+        sorted_nodes = sorted(node_details.keys(), key=node_details.get)
         max_node = sorted_nodes[-1]
-        return (max_node, node_density[max_node])
+        return (max_node, node_details[max_node])
+
+    def _base_clade_color(self, tree, clade: str):
+        """
+        Colors a single node for the specified clade
+
+        Args:
+            - tree(TreeNode): the tree whose background is to be coloured
+            - clade(str): the clade to color
+        """
+        coverage = (
+            0.9
+            if clade == "G_"
+            else 0.85
+            if clade == "GR"
+            else 0.84
+            if clade == "GH"
+            else 0.6
+        )
+        clade_total = len(self.clades[clade])
+        node, density_breakdown = self.max_ancestor(
+            tree, clade=clade, clade_total=clade_total, coverage=coverage
+        )
+        node.img_style = node_bg_style(node.img_style, clade)
+        print(
+            f"{clade} coverage: {(density_breakdown[1][clade] / clade_total * 100):.2f}%, density of coverage: {density_breakdown[0]:.2f}%"
+        )
+        self.colored_nodes.append(node)
 
     def _color_clades(self, tree: TreeNode):
         """
-        Sets the ['bgcolor'] of a node's [img_style] to be the appropriate color based on which clade group appears most frequently
+        Colors the 5 major clades (G, GH, GR, S, V) in the tree
 
         Args:
-            n(TreeNode) - The node whose background color is to be set
+            tree(TreeNode) - The tree whose background colors are to be set
         """
-        nodes_per_clade = self.find_num_nodes(tree)
-        for clade in self.clades_list:
-            node, density = self.max_ancestor(tree, clade, nodes_per_clade[clade])
-            node.img_style = node_bg_style(node.img_style, clade)
-
-    def get_tree(self, file: str, test: bool = False) -> Tree:
-        """
-        
-        """
-        tree = Tree(newick=file)
-
-        for i, n in enumerate(tree.iter_leaves()):
-            self._color_node(n)
-        self._root_on_s(tree)
-        self._color_clades(tree)
-        return tree
+        print(f"{len(self.leaf_clade_group.keys())} taxons present")
+        for clade in self.clade_list:
+            if clade == "L_" or clade == "O_":
+                continue
+            self._base_clade_color(tree, clade)
 
     def __call__(self, output: str, dpi: int = 300, width: int = 15000):
         self.tree.render(output, dpi=dpi, w=width, tree_style=tree_style())
@@ -253,11 +300,14 @@ def _parse_args():
 
 def main():
     args = _parse_args()
-    img = PhyloIMG(file=args.file)
     print("generating image, this will take a while. ~2-5 mins")
+    start = time.time()
+    img = PhyloIMG(file=args.file)
     img(
         output=args.out, dpi=args.dpi, width=args.width,
     )
+    end = time.time()
+    print(f"Time taken: {end - start:.2f}s")
 
 
 if __name__ == "__main__":
@@ -266,3 +316,8 @@ if __name__ == "__main__":
 # "./data/input_sample/fnb_all_rapidnj.nwk"
 # "phylo_tree_0width.png"
 
+
+# t = Tree(newick="./test/samples/phylo/fnb_all_rapidnj.nwk")
+# root = t.get_tree_root()
+# test = list(root.iter_leaves())[0]
+# test.up
