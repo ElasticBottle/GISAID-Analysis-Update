@@ -7,6 +7,7 @@ from ete3 import Tree, TreeNode
 
 
 def convert_to_nexus(file: str, out: str):
+    out += f'{datetime.date.today().strftime("%Y-%m-%d")}_Full'
     taxon_out = get_taxons_out(file)
     write_to_file(taxon_out, out, write=True)
     tree_txt = get_figtree(file)
@@ -83,7 +84,7 @@ def _parse_arg():
         "-o",
         type=str,
         dest="o",
-        default=f'./{datetime.date.today().strftime("%Y-%m-%d")}_Full',
+        default=f"./",
         help="The path to the output file. Should have no extensions. Deafult to today's date + '_Full'",
     )
     return parser.parse_args()
