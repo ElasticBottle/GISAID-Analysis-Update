@@ -207,11 +207,18 @@ class PhyloIMG:
             # Finding internal nodes that satisfy coverage criteria
             if node_per_clade.get(clade, 0) >= min_size:
                 density = self.calculate_density(node_per_clade, clade)
-                node_details[leaf] = (density, node_per_clade)
+                coverage = node_per_clade[clade] / clade_total * 100
+                node_details[leaf] = (density, coverage, node_per_clade)
 
         # Retrieving the node with densest collection of [clade]
         sorted_nodes = sorted(node_details.keys(), key=node_details.get)
         max_node = sorted_nodes[-1]
+        for node in reversed(sorted_nodes):
+            if (
+                node_details[node][0] > 90
+                and node_details[node][1] > node_details[max_node][1]
+            ):
+                max_node = node
         return (max_node, node_details[max_node])
 
     def _base_clade_color(self, tree, clade: str):
@@ -232,12 +239,12 @@ class PhyloIMG:
             else 0.6
         )
         clade_total = len(self.clades[clade])
-        node, density_breakdown = self.max_ancestor(
+        node, density_coverage_breakdown = self.max_ancestor(
             tree, clade=clade, clade_total=clade_total, coverage=coverage
         )
         node.img_style = node_bg_style(node.img_style, clade)
         print(
-            f"{clade} coverage: {(density_breakdown[1][clade] / clade_total * 100):.2f}%, density of coverage: {density_breakdown[0]:.2f}%"
+            f"{clade} coverage: {(density_coverage_breakdown[1]):.2f}%, density of coverage: {density_coverage_breakdown[0]:.2f}%"
         )
         self.colored_nodes.append(node)
 
@@ -300,7 +307,11 @@ def _parse_args():
 
 def main():
     args = _parse_args()
-    print("generating image, this will take a while. ~2-5 mins")
+    f_slash = args.file.rfind("/")
+    b_slash = args.file.rfind("\\")
+    print(
+        f"generating image for {args.file[f_slash + 1 if f_slash != -1 else b_slash + 1:]}, this will take a while. ~2-5 mins"
+    )
     start = time.time()
     img = PhyloIMG(file=args.file)
     img(
