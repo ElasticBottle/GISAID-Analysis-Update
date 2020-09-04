@@ -21,7 +21,6 @@ def tree_style() -> TreeStyle:
 
 
 def node_style(color: str = None) -> NodeStyle:
-
     style = NodeStyle()
     style["fgcolor"] = "#0f0f0f"
     style["size"] = 0
@@ -30,8 +29,8 @@ def node_style(color: str = None) -> NodeStyle:
     style["hz_line_color"] = color if color is not None else "#343434"
     style["vt_line_type"] = 0  # 0 solid, 1 dashed, 2 dotted
     style["hz_line_type"] = 0
-    style["vt_line_width"] = 0
-    style["hz_line_width"] = 0
+    style["vt_line_width"] = 2 if color is None else 0
+    style["hz_line_width"] = 2 if color is None else 0
     return style
 
 
@@ -286,7 +285,6 @@ def _parse_args():
     parser.add_argument(
         "-d",
         "--dpi",
-        nargs=1,
         default=300,
         type=int,
         dest="dpi",
@@ -295,8 +293,8 @@ def _parse_args():
     parser.add_argument(
         "-w",
         "--width",
-        nargs=1,
-        default=15000,
+        default=5000,
+        type=int,
         dest="width",
         help="Specifies the width of the image in pixel, the height is then automatically derived. Default 15000",
     )
