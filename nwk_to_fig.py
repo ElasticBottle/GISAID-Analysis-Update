@@ -6,13 +6,13 @@ from io import TextIOWrapper
 from ete3 import Tree, TreeNode
 
 
-def convert_to_nexus(file: str, out: str):
+def convert_to_nexus(file: str, out: str, setting_path: str):
     out += f'{datetime.date.today().strftime("%Y-%m-%d")}_Full'
     taxon_out = get_taxons_out(file)
     write_to_file(taxon_out, out, write=True)
     tree_txt = get_figtree(file)
     write_to_file(tree_txt, out)
-    settings = get_settings()
+    settings = get_settings(setting_path)
     write_to_file(settings, out)
 
 
@@ -53,8 +53,8 @@ def get_figtree(file: str):
     return result
 
 
-def get_settings():
-    with open("./fig_tree_settings.txt", "r") as f:
+def get_settings(setting_path: str):
+    with open(setting_path, "r") as f:
         settings = f.read()
     return settings
 
@@ -87,9 +87,17 @@ def _parse_arg():
         default=f"./",
         help="The path to the output file. Should have no extensions. Deafult to today's date + '_Full'",
     )
+    parser.add_argument(
+        "--settings",
+        "-s",
+        type=str,
+        dest="setting_path",
+        default="HOME_ann/BII/biipsashare/winston/GISAID-Analysis-Update/fig_tree_settings.txt",
+        help="The path to the setting file on your machine",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = _parse_arg()
-    convert_to_nexus(args.i, args.o)
+    convert_to_nexus(args.i, args.o, args.setting_path)

@@ -1,4 +1,5 @@
 import argparse
+import os
 import time
 from collections import defaultdict
 from typing import Dict, Iterable, List, Tuple, Union
@@ -298,7 +299,13 @@ def _parse_args():
         dest="width",
         help="Specifies the width of the image in pixel, the height is then automatically derived. Default 15000",
     )
-
+    parser.add_argument(
+        "-d",
+        "--display",
+        action="store_false",
+        dest="no_display",
+        help="Use this flag if you have a display",
+    )
     args = parser.parse_args()
     return args
 
@@ -310,6 +317,9 @@ def main():
     print(
         f"generating image for {args.file[f_slash + 1 if f_slash != -1 else b_slash + 1:]}, this will take a while. ~2-5 mins"
     )
+    if args.no_display:
+        os.environ["QT_QPA_PLATFORM"] = "offscreen"
+
     start = time.time()
     img = PhyloIMG(file=args.file)
     img(

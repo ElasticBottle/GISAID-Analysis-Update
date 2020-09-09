@@ -1,10 +1,10 @@
 import argparse
-from typing import List, Dict
 from collections import OrderedDict
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+from typing import Dict, List
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import seaborn as sns
 
 
@@ -321,4 +321,3 @@ def main():
 if __name__ == "__main__":
     main()
 # r"./data/input_sample/clade_progression.tsv"
-
