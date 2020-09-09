@@ -1,3 +1,5 @@
+#! /bin/bash
+
 BASE_PATH="/HOME_ann/BII/biipsashare/"
 INPUT_FOLDER="/HOME_ann/BII/biipsashare/winston/input/"
 OUTPUT_FOLDER="/HOME_ann/BII/biipsashare/winston/output/"
