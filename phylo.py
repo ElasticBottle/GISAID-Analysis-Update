@@ -284,7 +284,6 @@ def _parse_args():
         help="The output path of the image to be stored. Default ./out.png. Script assumes extension is 3 letters long, .png, .svg etc.",
     )
     parser.add_argument(
-        "-d",
         "--dpi",
         default=300,
         type=int,
