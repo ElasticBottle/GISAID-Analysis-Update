@@ -92,7 +92,7 @@ def _parse_arg():
         "-s",
         type=str,
         dest="setting_path",
-        default="HOME_ann/BII/biipsashare/winston/GISAID-Analysis-Update/fig_tree_settings.txt",
+        default="/HOME_ann/BII/biipsashare/winston/GISAID-Analysis-Update/fig_tree_settings.txt",
         help="The path to the setting file on your machine",
     )
     return parser.parse_args()
