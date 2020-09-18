@@ -129,7 +129,7 @@ class PhyloIMG:
     def _update_clades(self, clade: str, node: TreeNode):
         """
         Update [self.clades] and [self.leaf_clade_group] with the taxon and clade respectively
-        
+
         Args:
             - clade(str): The clade of the taxonomy
             - node(TreeNode): The node to be updated
@@ -145,7 +145,7 @@ class PhyloIMG:
 
     def _root_on_s(self, tree: TreeNode):
         s_ancestor, _ = self.max_ancestor(
-            tree, "S_", len(self.clades["S_"]), coverage=0.6, rooting=True
+            tree, "S_", len(self.clades["S_"]), coverage=0.5, rooting=True
         )
         tree.set_outgroup(s_ancestor)
 
@@ -182,7 +182,7 @@ class PhyloIMG:
     ) -> Tuple[TreeNode, float]:
         """
         Finds the internal node which captures [coverage] of taxons from [clade] and returns the node with the highest density of taxons from [clade]
-       
+
         Example:
         Tree has clade distribution of:
         {'GH': 947, 'O_': 304, 'G_': 887, 'S_': 186, 'GR': 1402, 'L_': 77, 'V_': 108}
@@ -236,7 +236,7 @@ class PhyloIMG:
             if clade == "GR"
             else 0.84
             if clade == "GH"
-            else 0.6
+            else 0.5
         )
         clade_total = len(self.clades[clade])
         node, density_coverage_breakdown = self.max_ancestor(
@@ -272,7 +272,10 @@ def _parse_args():
         epilog="If you notice any issues, please open one over at https://github.com/ElasticBottle/GISAID-Analysis-Update ",
     )
     parser.add_argument(
-        "file", type=str, default="", help="file path of the NEWICK tree to parse",
+        "file",
+        type=str,
+        default="",
+        help="file path of the NEWICK tree to parse",
     )
     parser.add_argument(
         "-o",
@@ -322,7 +325,9 @@ def main():
     start = time.time()
     img = PhyloIMG(file=args.file)
     img(
-        output=args.out, dpi=args.dpi, width=args.width,
+        output=args.out,
+        dpi=args.dpi,
+        width=args.width,
     )
     end = time.time()
     print(f"Time taken: {end - start:.2f}s")

@@ -8,7 +8,7 @@ SCRIPTS="/HOME_ann/BII/biipsashare/winston/GISAID-Analysis-Update/"
 PYTHON="~/miniconda3/envs/phylo/bin/python"
 
 #Script Paths
-EXTRACTOR=${SCRIPTS}extractor.py
+# EXTRACTOR=${SCRIPTS}extractor.py
 GRAPH_PLOTS=${SCRIPTS}graph_plot.py
 NWK_TO_FIG=${SCRIPTS}nwk_to_fig.py
 PHYLO=${SCRIPTS}phylo.py
@@ -23,12 +23,9 @@ PHYLO_LOGS=${OUTPUT_FOLDER}phylo_gen.log
 CLADE_OUTPUT=${OUTPUT_FOLDER}clade.png
 GEO_CLADES_OUTPUT=${OUTPUT_FOLDER}geoclade.png
 PHYLO_TREE_SVG_OUTPUT=${OUTPUT_FOLDER}phylo.svg
+NWK_OUTPUT=${OUTPUT_FOLDER}$(date '+%Y-%m-%d')_Full
 ZIP_FILE_OUTPUT${OUTPUT_FOLDER}tree_image_gen.zip
 
-# Extracting the files
-eval ${PYTHON} ${EXTRACTOR} ${BASE_PATH}raphael/treeupdate$(date --date="1 days ago" '+%Y%m%d').tar.xz ${INPUT_FOLDER}
-
-sleep 10
 
 # Plotting the graphs
 eval ${PYTHON} ${GRAPH_PLOTS} ${CLADE_PROGRESSION_INPUT} ${GEO_CLADES_INPUT} -co ${CLADE_OUTPUT} -go ${GEO_CLADES_OUTPUT}
@@ -36,15 +33,16 @@ eval ${PYTHON} ${GRAPH_PLOTS} ${CLADE_PROGRESSION_INPUT} ${GEO_CLADES_INPUT} -co
 # Converting and cleaning the nwk file
 eval ${PYTHON} ${NWK_TO_FIG} -i ${NWK_FILE} -o ${OUTPUT_FOLDER}
 
-# Remove old log file, generating new Phylo tree and logs
+# Remove old log file
 eval rm ${PHYLO_LOGS}
 
+# Generating the phylo tree image with logs
 eval ${PYTHON} ${PHYLO} ${NWK_FILE} -o ${PHYLO_TREE_SVG_OUTPUT} >> ${PHYLO_LOGS}
 
 # Remove old zip files and generates a new one
 eval  rm ${ZIP_FILE_OUTPUT}
 
-eval zip ${ZIP_FILE_OUTPUT} ${CLADE_OUTPUT} ${GEO_CLADES_OUTPUT} ${OUTPUT_FOLDER}$(date '+%Y-%m-%d')_Full ${PHYLO_TREE_SVG_OUTPUT}
+eval zip ${ZIP_FILE_OUTPUT} ${CLADE_OUTPUT} ${GEO_CLADES_OUTPUT} ${NWK_OUTPUT} ${PHYLO_TREE_SVG_OUTPUT}
 
 # Sends mail with Logs as content and zip file as attachment
-eval mail -a ${ZIP_FILE_OUTPUT} -s "Tree auto generated" winstonyeo99@yahoo.com < ${PHYLO_LOGS}
+eval mail -a ${ZIP_FILE_OUTPUT} -s "Tree auto generated ${date '+%Y-%m-%d'}" winstonyeo99@yahoo.com < ${PHYLO_LOGS}
