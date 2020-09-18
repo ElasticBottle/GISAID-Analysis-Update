@@ -26,6 +26,8 @@ PHYLO_TREE_SVG_OUTPUT=${OUTPUT_FOLDER}phylo.svg
 NWK_OUTPUT=${OUTPUT_FOLDER}$(date '+%Y-%m-%d')_Full
 ZIP_FILE_OUTPUT=${OUTPUT_FOLDER}tree_image_gen.zip
 
+# Subject Line
+SUBJECT="Tree auto generated $(date '+%Y-%m-%d')"
 
 # Plotting the graphs
 eval ${PYTHON} ${GRAPH_PLOTS} ${CLADE_PROGRESSION_INPUT} ${GEO_CLADES_INPUT} -co ${CLADE_OUTPUT} -go ${GEO_CLADES_OUTPUT}
@@ -45,4 +47,4 @@ eval  rm ${ZIP_FILE_OUTPUT}
 eval zip ${ZIP_FILE_OUTPUT} ${CLADE_OUTPUT} ${GEO_CLADES_OUTPUT} ${NWK_OUTPUT} ${PHYLO_TREE_SVG_OUTPUT}
 
 # Sends mail with Logs as content and zip file as attachment
-eval mail -a ${ZIP_FILE_OUTPUT} -s "Tree auto generated ${date '+%Y-%m-%d'}" winstonyeo99@yahoo.com < ${PHYLO_LOGS}
+eval mail -a ${ZIP_FILE_OUTPUT} -s "$SUBJECT" winstonyeo99@yahoo.com < ${PHYLO_LOGS}
