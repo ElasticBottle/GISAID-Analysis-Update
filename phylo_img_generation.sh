@@ -24,7 +24,7 @@ CLADE_OUTPUT=${OUTPUT_FOLDER}clade.png
 GEO_CLADES_OUTPUT=${OUTPUT_FOLDER}geoclade.png
 PHYLO_TREE_SVG_OUTPUT=${OUTPUT_FOLDER}phylo.svg
 NWK_OUTPUT=${OUTPUT_FOLDER}$(date '+%Y-%m-%d')_Full
-ZIP_FILE_OUTPUT${OUTPUT_FOLDER}tree_image_gen.zip
+ZIP_FILE_OUTPUT=${OUTPUT_FOLDER}tree_image_gen.zip
 
 
 # Plotting the graphs
