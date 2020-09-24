@@ -3,6 +3,7 @@ from collections import OrderedDict
 from typing import Dict, List
 
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -17,27 +18,61 @@ def remove_borders():
 
 
 def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
-    pallette = [
-        "#7f7f7f",
-        "#c6e0b4",
-        "#d9d9d9",
-        "#ffccff",
-        "#ffcccc",
-        "#f5b183",
-        "#fe7c80",
-    ]
-    plt.stackplot(
-        index, *values, labels=labels, colors=pallette,
+    pallette = OrderedDict(
+        [
+            ("O", "#7f7f7f"),
+            ("S", "#c6e0b4"),
+            ("L", "#d9d9d9"),
+            ("V", "#ffccff"),
+            ("G", "#ffcccc"),
+            ("G+S477X", "#ffcccc"),
+            ("GH", "#f5b183"),
+            ("GH+S477X", "#f5b183"),
+            ("GR", "#fe7c80"),
+            ("GR+S477X", "#fe7c80"),
+        ]
     )
+    to_hatch = ["G+S477X", "GH+S477X", "GR+S477X"]
+
+    fig, ax = plt.subplots()
+    stacks = ax.stackplot(
+        index, *values, labels=labels, colors=list(pallette.values()),
+    )
+
+    for stack, key in zip(stacks, pallette.keys()):
+        if key in to_hatch:
+            stack.set_hatch("++")
+
     y_ticks = list(map(lambda x: f"{x:.0f}%", np.arange(110, step=10)))
     plt.yticks(
         ticks=np.arange(110, step=10), labels=y_ticks,
     )
     plt.xticks(rotation=90)
-    plt.margins(y=0)
-    plt.legend(ncol=7, loc="lower center", bbox_to_anchor=(0.5, -0.3))
-    plt.tight_layout()
-    plt.savefig(out, dpi=300)
+    ax.margins(y=0)
+    ax.legend(ncol=5, loc="lower center", bbox_to_anchor=(0.5, -0.4))
+    fig.tight_layout()
+    fig.savefig(out, dpi=300)
+    return fig, ax
+
+
+def plot_overlap_line_graph(fig, axes, x, y):
+    print("non clade stuff", y)
+    pallette = [
+        "#f2a210",
+        "#f53312",
+        "#117283",
+    ]
+    for index, series_tup in enumerate(y.items()):
+        label, value = series_tup
+        axes.plot(x, value, label=label, color=pallette[index])
+    y_ticks = list(map(lambda x: f"{x:.0f}%", np.arange(110, step=10)))
+    plt.yticks(
+        ticks=np.arange(110, step=10), labels=y_ticks,
+    )
+    axes.legend(ncol=3, loc="lower center", bbox_to_anchor=(0.5, -0.5))
+    # Make some space on the right side for the extra y-axis.
+    fig.subplots_adjust(right=0.9)
+    fig.savefig("./updated_curation/output/random.png", dpi=300)
 
 
 def generate_clade_progression(file: str, out: str):
@@ -75,40 +110,67 @@ def generate_clade_progression(file: str, out: str):
         -out(str): the output path for the generated graph
     """
     df = pd.read_csv(file, sep="\t", skiprows=1, index_col=0,)
-
-    # Retreive the monthly dataframe
-    monthly_df = df.loc[:"Cumulative:", :].iloc[:-1]
-    monthly_df = monthly_df.astype(float)
-    hor_sum = monthly_df.sum(axis=1)
-    df_percentage = monthly_df.div(hor_sum, axis=0) * 100
-
-    # If ever need to retrieve the cumulative_dataFrame
-    # cum_df = df.loc["Month":, :].iloc[1:]
-    # cum_df = cum_df.astype(float)
-
-    # Separate out the individual rows for plotting
-    values = [None] * 7
     insert_order = {
         "O": 0,
         "S": 1,
         "L": 2,
         "V": 3,
         "G": 4,
-        "GH": 5,
-        "GR": 6,
+        "G+S477X": 5,
+        "GH": 6,
+        "GH+S477X": 7,
+        "GR": 8,
+        "GR+S477X": 9,
     }
-    for label, value in df_percentage.items():
+
+    labels = OrderedDict(
+        [
+            ("O", "O"),
+            ("S", "S"),
+            ("L", "L"),
+            ("V", "V"),
+            ("G", "G"),
+            ("Gn", "G+S477X"),
+            ("GH", "GH"),
+            ("GHn", "GH+S477X"),
+            ("GR", "GR"),
+            ("GRn", "GR+S477X"),
+        ]
+    )
+
+    # Retreive the monthly dataframe
+    monthly_df = df.loc[:"Cumulative:", :].iloc[:-1]
+    monthly_df = monthly_df.astype(float)
+    # If ever need to retrieve the cumulative_dataFrame
+    # cum_df = df.loc["Month":, :].iloc[1:]
+    # cum_df = cum_df.astype(float)
+
+    monthly_df.rename(columns=labels, inplace=True)
+    hor_sum = monthly_df.sum(axis=1)
+
+    # Find the percentage of the the clades // mutation
+    clade_df_percentage = monthly_df.div(hor_sum, axis=0) * 100
+
+    # Separate out the individual rows for plotting
+    values = [None] * len(insert_order)
+
+    # Making the values for the clades
+    for label, value in clade_df_percentage.items():
         values[insert_order.get(label, 0)] = value
+
     remove_borders()
-    plot_stacked_area(
-        df_percentage.index,
-        sorted(df.columns, key=lambda x: insert_order.get(x, 0)),
+    fig, axes = plot_stacked_area(
+        clade_df_percentage.index,
+        sorted(labels.values(), key=lambda x: insert_order.get(x, 0)),
         values,
         out,
     )
+    # plot_overlap_line_graph(
+    #     fig, axes.twinx(), mutation_df_percentage.index, mutation_df_percentage
+    # )
 
 
-def make_df(file: str, continents: List[str]) -> Dict[str, pd.DataFrame]:
+def make_df(file: str, continents: List[str]) -> Dict[str, pd.Series]:
     """
     Builds the dataFrame given a file
 
@@ -174,7 +236,7 @@ def make_df(file: str, continents: List[str]) -> Dict[str, pd.DataFrame]:
 
     def get_clade_value(f):
         clades, values = [], []
-        for _ in range(7):
+        for _ in range(10):
             clade, value = f.readline().split("\t")
             assert clade is not None and value is not None
             assert len(clade) > 0 and len(value) > 0
@@ -196,7 +258,7 @@ def make_df(file: str, continents: List[str]) -> Dict[str, pd.DataFrame]:
     return dfs
 
 
-def make_pie_chart(index: int, values: pd.Series, title: str):
+def make_pie_chart(index: int, values: pd.Series, title: str, axs):
     """
     Builds a pie chart at [index] of a 2, 3 subplot with [values] and [title]
 
@@ -204,27 +266,67 @@ def make_pie_chart(index: int, values: pd.Series, title: str):
         - index(int): the location of the pie chart. Increases right to left and up to down
         - values(pd.Series): The pandas series contain both the labels of the individual portion of the chart and the actual values for each clade
         - title(str): the title of the chart
+        - axs: The maplotlib Axs to plot the pie chart on
     """
+
+    def get_index(index: int) -> List[int]:
+        index -= 1
+        if index >= 3:
+            index -= 3
+            return [1, index]
+        return [0, index]
+
+    labels = OrderedDict(
+        [
+            ("O", "O"),
+            ("S", "S"),
+            ("L", "L"),
+            ("V", "V"),
+            ("G", "G"),
+            ("Gn", "G+S477X"),
+            ("GH", "GH"),
+            ("GHn", "GH+S477X"),
+            ("GR", "GR"),
+            ("GRn", "GR+S477X"),
+        ]
+    )
     colors = {
         "G": "#ffcccc",
+        "G+S477X": "#ffcccc",
         "GH": "#f4b183",
+        "GH+S477X": "#f4b183",
         "GR": "#ff7c80",
+        "GR+S477X": "#ff7c80",
         "L": "#d9d9d9",
         "O": "#808080",
         "S": "#70ad47",
         "V": "#ff99ff",
     }
+    to_hatch = ["G+S477X", "GH+S477X", "GR+S477X"]
+    indices = get_index(index)
+    # print(values)
+    values.rename(index=labels, inplace=True)
+    # print("renamed", values)
     normalize = values.values.sum(axis=0) != 0
+    # print(normalize)
 
-    plt.subplot(2, 3, index)
-    plt.title(label=title, fontdict={"fontsize": 10})
-
-    plt.pie(
-        values.values,
-        normalize=normalize,
-        labeldistance=None,
-        colors=list(colors.values()),
+    axs[indices[0], indices[1]].set_title(label=title, fontdict={"fontsize": 10})
+    pie = axs[indices[0], indices[1]].pie(
+        values.values, normalize=normalize, labeldistance=None, colors=colors.values()
     )
+    plotted_val = values[values > 0]
+
+    for wedge, clade in zip(pie[0], plotted_val.index):
+        if clade in to_hatch:
+            wedge.set_hatch("++")
+
+    wedges = {}
+    for key, value in colors.items():
+        patch = mpatches.Patch(
+            facecolor=value, hatch="+++" if key in to_hatch else "", label=key
+        )
+        wedges[key] = patch
+    return wedges
 
 
 def generate_geoclade_progression(file: str, out: str):
@@ -245,14 +347,20 @@ def generate_geoclade_progression(file: str, out: str):
     ]
     continents_index = [2, 3, 5, 6, 1, 4]
     dfs = make_df(file, continents)
+    fig, axs = plt.subplots(2, 3)
+    patches = {}
     for i, item in enumerate(dfs.items()):
         title, chart_labels = item
         graph_index = continents_index[i]
-        make_pie_chart(graph_index, chart_labels, title)
-    labels = list(dfs.values())[0].index
-    plt.legend(labels=labels, ncol=4, loc="lower center", bbox_to_anchor=(1.7, -0.4))
-
-    plt.savefig(out, dpi=300)
+        patches.update(make_pie_chart(graph_index, chart_labels, title, axs))
+    axs[1, 0].legend(
+        handles=list(patches.values()),
+        labels=list(patches.keys()),
+        ncol=5,
+        loc="lower center",
+        bbox_to_anchor=(1.7, -0.4),
+    )
+    fig.savefig(out, dpi=300)
 
 
 def _parse_args():
