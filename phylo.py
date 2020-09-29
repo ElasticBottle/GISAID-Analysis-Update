@@ -121,9 +121,12 @@ class PhyloIMG:
         """
         name_color = name.split("color=")
         clade = name_color[0][1:3]
+        if clade == "Gn":
+            clade = "G_"
         color = None
         if len(name_color) == 2:
             color = name_color[1][:-2]
+        print(clade)
         return (clade, color)
 
     def _update_clades(self, clade: str, node: TreeNode):
@@ -272,10 +275,7 @@ def _parse_args():
         epilog="If you notice any issues, please open one over at https://github.com/ElasticBottle/GISAID-Analysis-Update ",
     )
     parser.add_argument(
-        "file",
-        type=str,
-        default="",
-        help="file path of the NEWICK tree to parse",
+        "file", type=str, default="", help="file path of the NEWICK tree to parse",
     )
     parser.add_argument(
         "-o",
@@ -325,9 +325,7 @@ def main():
     start = time.time()
     img = PhyloIMG(file=args.file)
     img(
-        output=args.out,
-        dpi=args.dpi,
-        width=args.width,
+        output=args.out, dpi=args.dpi, width=args.width,
     )
     end = time.time()
     print(f"Time taken: {end - start:.2f}s")
