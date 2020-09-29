@@ -304,21 +304,27 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
     }
     to_hatch = ["G+S477X", "GH+S477X", "GR+S477X"]
     indices = get_index(index)
-    # print(values)
+    # print(title, values)
     values.rename(index=labels, inplace=True)
     # print("renamed", values)
     normalize = values.values.sum(axis=0) != 0
-    # print(normalize)
 
     axs[indices[0], indices[1]].set_title(label=title, fontdict={"fontsize": 10})
     pie = axs[indices[0], indices[1]].pie(
         values.values, normalize=normalize, labeldistance=None, colors=colors.values()
     )
     plotted_val = values[values > 0]
+    plotted_clades = sorted(
+        plotted_val.index, key=lambda x: plotted_val[x], reverse=True
+    )
 
-    for wedge, clade in zip(pie[0], plotted_val.index):
+    wedges = list(map(lambda x: (x, x.theta2 - x.theta1), pie[0]))
+    wedges = sorted(wedges, key=lambda x: x[1], reverse=True)
+    for wedge, clade in zip(wedges, plotted_clades):
+        # print(wedge, clade)
+        # print(f"{clade} in {to_hatch} = {clade in to_hatch}")
         if clade in to_hatch:
-            wedge.set_hatch("++")
+            wedge[0].set_hatch("+++")
 
     wedges = {}
     for key, value in colors.items():
