@@ -26,8 +26,8 @@ def node_style(color: str = None) -> NodeStyle:
     style["fgcolor"] = "#0f0f0f"
     style["size"] = 0
     style["shape"] = "circle"
-    style["vt_line_color"] = color if color is not None else "#343434"
-    style["hz_line_color"] = color if color is not None else "#343434"
+    style["vt_line_color"] = f"#{color}" if color is not None else "#343434"
+    style["hz_line_color"] = f"#{color}" if color is not None else "#343434"
     style["vt_line_type"] = 0  # 0 solid, 1 dashed, 2 dotted
     style["hz_line_type"] = 0
     style["vt_line_width"] = 2 if color is None else 0
@@ -52,7 +52,7 @@ def node_bg_style(style: Dict, clade: str, bg_color: str = None):
 
 
 class PhyloIMG:
-    def __init__(self, file: str):
+    def __init__(self, file: str, is_quoted: bool):
         self.file = file
         self.clade_list = [
             "G_",
@@ -75,18 +75,18 @@ class PhyloIMG:
         self.leaf_clade_group = {}  # taxon_name -> clade CURRENTLY NOT USED
         self.colored_nodes = (
             []
-        )  # list of internal nodes whose bgcolor has been changed CURRENTLY NOT USED
+        )  # list of internal nodes whose bg color has been changed CURRENTLY NOT USED
         self.nodes_per_clade = {}  # internal_node -> number of leaves in each clade
-        self.tree = self.get_tree(self.file)
+        self.tree = self.get_tree(self.file, is_quoted=is_quoted)
 
-    def get_tree(self, file: str) -> Tree:
+    def get_tree(self, file: str, is_quoted: bool) -> Tree:
         """
         Creates a newick tree where leafs are colored base on the tag in name, and background base on the clade grouping.
 
         Args:
             - file(str): the path to the newick tree
         """
-        tree = Tree(newick=file)
+        tree = Tree(newick=file, quoted_node_names=is_quoted)
         self._set_node_style(tree)
         self._root_on_s(tree)
         self._color_clades(tree)
@@ -112,21 +112,23 @@ class PhyloIMG:
     def _get_clade_color(self, name: str) -> Tuple[str, Union[str, None]]:
         """
         Args:
-            - name(str): In one of the following formats ('' is part of the string):
-                'GR_USAMNMDH1413_20200623_NorthAmerica_[&!color=ff00cc]'
-                'GR_EnglandLONDD4621_20200408_Europe_'
+            - name(str): In one of the following formats :
+                GR_USAMNMDH1413_20200623_NorthAmerica_[&!color=ff00cc]
+                GR_EnglandLONDD4621_20200408_Europe_
         Returns:
             - str: the clade that the taxonomy belongs too
             - str / None : the color for that clade if any
         """
-        name_color = name.split("color=")
-        clade = name_color[0][1:3]
+        # rapidnj tree option
+        # name_color = name.split("color=")
+        # IQ tree option
+        name_color = name.split("____color__")
+        clade = name_color[0][0:2]
         if clade == "Gn":
             clade = "G_"
         color = None
         if len(name_color) == 2:
-            color = name_color[1][:-2]
-        print(clade)
+            color = name_color[1][:-1]
         return (clade, color)
 
     def _update_clades(self, clade: str, node: TreeNode):
@@ -199,14 +201,13 @@ class PhyloIMG:
         for leaf in tree.traverse():
             if leaf.is_leaf() or leaf.is_root():
                 continue
-
             # Saving calculations to prevent extra calculations
             node_per_clade = self.nodes_per_clade.get(leaf, None)
+            # print(node_per_clade)
             if node_per_clade is None:
                 node_per_clade = self.find_num_nodes(leaf)
                 if not rooting:
                     self.nodes_per_clade[leaf] = node_per_clade
-
             # Finding internal nodes that satisfy coverage criteria
             if node_per_clade.get(clade, 0) >= min_size:
                 density = self.calculate_density(node_per_clade, clade)
@@ -308,6 +309,13 @@ def _parse_args():
         dest="no_display",
         help="Use this flag if you have a display",
     )
+    parser.add_argument(
+        "-q",
+        "--quoted",
+        action="store_true",
+        dest="is_quoted",
+        help="Use this flag if newwick file contains quotes",
+    )
     args = parser.parse_args()
     return args
 
@@ -323,7 +331,7 @@ def main():
         os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
     start = time.time()
-    img = PhyloIMG(file=args.file)
+    img = PhyloIMG(file=args.file, is_quoted=args.is_quoted)
     img(
         output=args.out, dpi=args.dpi, width=args.width,
     )
