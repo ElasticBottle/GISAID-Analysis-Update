@@ -2,8 +2,10 @@ import argparse
 from collections import OrderedDict
 from typing import Dict, List
 
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+from matplotlib.collections import PolyCollection
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -15,6 +17,153 @@ def remove_borders():
     right_side.set_visible(False)
     top_side = ax.spines["top"]
     top_side.set_visible(False)
+
+
+def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
+    def make_tick_index(index, scale):
+        result = []
+        for idx in range(len(index) * scale):
+            if (idx % scale) == 0:
+                result.append(index[int(idx / scale)])
+            else:
+                result.append("")
+        print(result)
+        return result
+
+    pallette = OrderedDict(
+        [
+            ("L", "#d9d9d9"),
+            ("O", "#7f7f7f"),
+            ("S", "#c6e0b4"),
+            ("V", "#ffccff"),
+            ("G", "#ffcccc"),
+            ("G+S477X", "#ffcccc"),
+            ("GH", "#f5b183"),
+            ("GH+S477X", "#f5b183"),
+            ("GR", "#fe7c80"),
+            ("GR+S477X", "#fe7c80"),
+        ]
+    )
+    to_hatch = ["G+S477X", "GH+S477X", "GR+S477X"]
+    non_g_clades = [
+        "L",
+        "O",
+        "S",
+        "V",
+    ]
+    non_g_clade_len = len(non_g_clades)
+    g_clades = df.columns.difference(non_g_clades).tolist()
+    g_clade_len = len(g_clades)
+    order = {
+        "L": 3,
+        "O": 4,
+        "S": 5,
+        "V": 6,
+        "G, G+S477X": 2,
+        "GH, GH+S477X": 1,
+        "GR, GR+S477X": 0,
+    }
+    # pallette = OrderedDict(
+    #     [
+    #         ("S", "#c6e0b4"),
+    #         ("L", "#d9d9d9"),
+    #         ("V", "#ffccff"),
+    #         ("G", "#ffcccc"),
+    #         ("GH", "#f5b183"),
+    #         ("GR", "#fe7c80"),
+    #         ("O", "#7f7f7f"),
+    #         # ("G+S477X", "#ffcccc"),
+    #         # ("GH+S477X", "#f5b183"),
+    #         # ("GR+S477X", "#fe7c80"),
+    #     ]
+    # )
+    # order = {
+    #     "S": 0,
+    #     "L": 1,
+    #     "V": 2,
+    #     "G": 3,
+    #     "GH": 4,
+    #     "GR": 5,
+    #     "O": 6,
+    # }
+
+    fig = plt.figure()
+    ax = plt.gca(projection="3d")
+    xs = np.arange(0, len(index), 1)
+    max_count = 6200
+
+    # Creating the polygons to plot
+    vert = [None] * non_g_clade_len
+    for idx, series in df.items():
+        if idx in non_g_clades:
+            ys = series.tolist()
+            vert[order[idx] - 3] = list(zip(list(reversed(xs)), ys))
+    non_g_pallette = [x for x in pallette.items() if x[0] in non_g_clades]
+    colors = sorted(non_g_pallette, key=lambda x: order.get(x[0]))
+    colors = dict((x, y) for x, y in colors)
+    non_g_poly = PolyCollection(vert, facecolors=colors.values())
+    ax.add_collection3d(non_g_poly, zs=range(3, non_g_clade_len + 3), zdir="y")
+
+    g_poly = []
+    # Plotting G polygons
+    if g_clade_len == 6:
+        for i in range(0, g_clade_len - 1, 2):
+            value = [df[g_clades[i]].tolist(), df[g_clades[i + 1]].tolist()]
+            stacks = ax.stackplot(
+                list(reversed(xs)),
+                *value,
+                colors=[x[1] for x in pallette.items() if x[0] == g_clades[i]],
+            )
+            for stack, key in zip(stacks, [g_clades[i], g_clades[i + 1]]):
+                stack.set_alpha(0.8)
+                ax.add_collection3d(stack, zs=2 - (i / 2), zdir="y")
+
+                if key in to_hatch:
+                    stack.set_hatch("++")
+
+            g_poly.append(stacks)
+    else:
+        raise NotImplementedError("Only G Gh GR not implemented")
+
+    # setting the x axis and labels
+    ax.set_xlabel("Date", labelpad=12)
+    ax.set_xticks(list(range(len(index))))
+    ax.set_xticklabels(reversed(index), rotation=45, ha="right")
+
+    # setting the y axis and labels
+    # ax.set_ylabel("Clade", labelpad=2)
+    ax.set_yticks([-1] + list(range((len(order)))))
+    ax.set_yticklabels(
+        [""] + list(sorted(order.keys(), key=lambda x: order.get(x))),
+        ha="left",
+        rotation=-20,
+    )
+
+    # setting the z axis and label
+    ax.zaxis.set_rotate_label(False)
+    ax.set_zlabel("Count", rotation=0, labelpad=7)
+    ax.set_zlabel("Count")
+    ax.set_zlim3d(0, max_count)
+
+    # adjusting the tick distance from axis
+    ax.tick_params(axis="x", which="major", pad=-5)
+    ax.tick_params(axis="y", which="major", pad=-2)
+
+    # make the panes transparent
+    ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+
+    # make the grid lines transparent
+    # ax.xaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
+    ax.yaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
+    # # ax.zaxis._axinfo["grid"]["color"] = (1, 1, 1, 0)
+
+    # setting the view point
+    ax.view_init(elev=15.0, azim=135)
+    # plt.show()
+    plt.savefig(out, dpi=320)
+    return fig, ax
 
 
 def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
@@ -75,7 +224,7 @@ def plot_overlap_line_graph(fig, axes, x, y):
     fig.savefig("./updated_curation/output/random.png", dpi=300)
 
 
-def generate_clade_progression(file: str, out: str):
+def generate_clade_progression(file: str, out: str, is3d: bool):
     """
     Generates a Stacked area plot for the clade progression tsv file at [file] and stores the result in [out]
 
@@ -159,11 +308,15 @@ def generate_clade_progression(file: str, out: str):
         values[insert_order.get(label, 0)] = value
 
     remove_borders()
-    fig, axes = plot_stacked_area(
-        clade_df_percentage.index,
-        sorted(labels.values(), key=lambda x: insert_order.get(x, 0)),
-        values,
-        out,
+    fig, axes = (
+        plot_3d(monthly_df.index, monthly_df, out,)
+        if is3d
+        else plot_stacked_area(
+            clade_df_percentage.index,
+            sorted(labels.values(), key=lambda x: insert_order.get(x, 0)),
+            values,
+            out,
+        )
     )
     # plot_overlap_line_graph(
     #     fig, axes.twinx(), mutation_df_percentage.index, mutation_df_percentage
@@ -421,13 +574,21 @@ def _parse_args():
         action="store_false",
         help="Flag to disable the generation of the geoclade graph. If enabled, specify gibberish string for geo_clade_file input",
     )
+
+    parser.add_argument(
+        "-c3d",
+        "--clade3d",
+        dest="c3d",
+        action="store_true",
+        help="Uses 3d stack area plot instead of regular 3d plot",
+    )
     return parser.parse_args()
 
 
 def main():
     args = _parse_args()
     if args.gc:
-        generate_clade_progression(args.c_file, args.c_out)
+        generate_clade_progression(args.c_file, args.c_out, args.c3d)
     if args.gg:
         generate_geoclade_progression(args.g_file, args.g_out)
 
