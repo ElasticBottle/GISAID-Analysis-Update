@@ -6,9 +6,9 @@ from io import TextIOWrapper
 from ete3 import Tree, TreeNode
 
 
-def convert_to_nexus(file: str, out: str, setting_path: str):
+def convert_to_nexus(file: str, out: str, setting_path: str, is_quoted:bool):
     out += f'{datetime.date.today().strftime("%Y-%m-%d")}_Full'
-    taxon_out = get_taxons_out(file)
+    taxon_out = get_taxons_out(file, is_quoted)
     write_to_file(taxon_out, out, write=True)
     tree_txt = get_figtree(file)
     write_to_file(tree_txt, out)
@@ -16,12 +16,15 @@ def convert_to_nexus(file: str, out: str, setting_path: str):
     write_to_file(settings, out)
 
 
-def get_taxons_out(file: str):
+def get_taxons_out(file: str, is_quoted:bool):
     def build_taxon_format(taxons: List[str]):
         taxons.sort()
         out = f"#NEXUS\nbegin taxa;\n\tdimensions ntax={len(taxons)};\n\ttaxlabels\n"
         for taxon in taxons:
-            out += f"\t{taxon[1:-1]}\n"
+            if is_quoted:
+                out += f"\t{taxon[1:-1]}\n"
+            else:
+                out+= f"\t{taxon}\n"
         out += f";\nend;\n\n"
         return out
 
@@ -95,9 +98,16 @@ def _parse_arg():
         default="/HOME_ann/BII/biipsashare/winston/GISAID-Analysis-Update/fig_tree_settings.txt",
         help="The path to the setting file on your machine",
     )
+    parser.add_argument(
+        "--is_quoted",
+        "-q",
+        dest = "is_quoted",
+        action = "store_true",
+        help="Use if the taxon name for newick files contains quotes"
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = _parse_arg()
-    convert_to_nexus(args.i, args.o, args.setting_path)
+    convert_to_nexus(args.i, args.o, args.setting_path, args.is_quoted)

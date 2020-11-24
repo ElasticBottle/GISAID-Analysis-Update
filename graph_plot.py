@@ -175,13 +175,15 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
             ("V", "#ffccff"),
             ("G", "#ffcccc"),
             ("G+S477X", "#ffcccc"),
+            ("GV", "#f08bb5"),
+            ("GV+S477X", "#f08bb5"),
             ("GH", "#f5b183"),
             ("GH+S477X", "#f5b183"),
             ("GR", "#fe7c80"),
             ("GR+S477X", "#fe7c80"),
         ]
     )
-    to_hatch = ["G+S477X", "GH+S477X", "GR+S477X"]
+    to_hatch = ["G+S477X", "GH+S477X", "GR+S477X", "GV+S477X"]
 
     fig, ax = plt.subplots()
     stacks = ax.stackplot(
@@ -198,30 +200,11 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     )
     plt.xticks(rotation=90)
     ax.margins(y=0)
-    ax.legend(ncol=5, loc="lower center", bbox_to_anchor=(0.5, -0.4))
-    fig.tight_layout()
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0 + 0.2, box.width, box.height * 0.85])
+    ax.legend(ncol=5, loc="lower center", bbox_to_anchor=(0.48, -0.45))
     fig.savefig(out, dpi=300)
     return fig, ax
-
-
-def plot_overlap_line_graph(fig, axes, x, y):
-    print("non clade stuff", y)
-    pallette = [
-        "#f2a210",
-        "#f53312",
-        "#117283",
-    ]
-    for index, series_tup in enumerate(y.items()):
-        label, value = series_tup
-        axes.plot(x, value, label=label, color=pallette[index])
-    y_ticks = list(map(lambda x: f"{x:.0f}%", np.arange(110, step=10)))
-    plt.yticks(
-        ticks=np.arange(110, step=10), labels=y_ticks,
-    )
-    axes.legend(ncol=3, loc="lower center", bbox_to_anchor=(0.5, -0.5))
-    # Make some space on the right side for the extra y-axis.
-    fig.subplots_adjust(right=0.9)
-    fig.savefig("./updated_curation/output/random.png", dpi=300)
 
 
 def generate_clade_progression(file: str, out: str, is3d: bool):
@@ -266,24 +249,28 @@ def generate_clade_progression(file: str, out: str, is3d: bool):
         "V": 3,
         "G": 4,
         "G+S477X": 5,
-        "GH": 6,
-        "GH+S477X": 7,
-        "GR": 8,
-        "GR+S477X": 9,
+        "GV": 6,
+        "GV+S477X": 7,
+        "GH": 8,
+        "GH+S477X": 9,
+        "GR": 10,
+        "GR+S477X":11,
     }
 
     labels = OrderedDict(
         [
-            ("O", "O"),
-            ("S", "S"),
-            ("L", "L"),
-            ("V", "V"),
             ("G", "G"),
             ("Gn", "G+S477X"),
             ("GH", "GH"),
             ("GHn", "GH+S477X"),
             ("GR", "GR"),
             ("GRn", "GR+S477X"),
+            ("GV", "GV"),
+            ("GVn", "GV+S477X"),
+            ("O", "O"),
+            ("S", "S"),
+            ("L", "L"),
+            ("V", "V"),
         ]
     )
 
@@ -318,9 +305,7 @@ def generate_clade_progression(file: str, out: str, is3d: bool):
             out,
         )
     )
-    # plot_overlap_line_graph(
-    #     fig, axes.twinx(), mutation_df_percentage.index, mutation_df_percentage
-    # )
+
 
 
 def make_df(file: str, continents: List[str]) -> Dict[str, pd.Series]:
@@ -441,8 +426,11 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
             ("GHn", "GH+S477X"),
             ("GR", "GR"),
             ("GRn", "GR+S477X"),
+            ("GV", "GV"),
+            ("GVn", "GV+S477X"),
         ]
     )
+    # Must correspond to order in data
     colors = {
         "G": "#ffcccc",
         "G+S477X": "#ffcccc",
@@ -450,12 +438,14 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
         "GH+S477X": "#f4b183",
         "GR": "#ff7c80",
         "GR+S477X": "#ff7c80",
+        "GV": "#f08bb5",
+        "GV+S477X": "#f08bb5",
         "L": "#d9d9d9",
         "O": "#808080",
         "S": "#70ad47",
         "V": "#ff99ff",
     }
-    to_hatch = ["G+S477X", "GH+S477X", "GR+S477X"]
+    to_hatch = ["G+S477X", "GH+S477X", "GR+S477X", "GV+S477X"]
     indices = get_index(index)
     # print(title, values)
     values.rename(index=labels, inplace=True)
@@ -517,7 +507,7 @@ def generate_geoclade_progression(file: str, out: str):
         labels=list(patches.keys()),
         ncol=5,
         loc="lower center",
-        bbox_to_anchor=(1.7, -0.4),
+        bbox_to_anchor=(1.7, -0.46),
     )
     fig.savefig(out, dpi=300)
 

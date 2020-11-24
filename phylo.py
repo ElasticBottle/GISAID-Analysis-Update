@@ -26,8 +26,12 @@ def node_style(color: str = None) -> NodeStyle:
     style["fgcolor"] = "#0f0f0f"
     style["size"] = 0
     style["shape"] = "circle"
-    style["vt_line_color"] = f"#{color}" if color is not None else "#343434"
-    style["hz_line_color"] = f"#{color}" if color is not None else "#343434"
+    # iqtree
+    # style["vt_line_color"] = f"#{color}" if color is not None else "#343434"
+    # style["hz_line_color"] = f"#{color}" if color is not None else "#343434"
+    # fasttree and rapidnj
+    style["vt_line_color"] = color if color is not None else "#343434"
+    style["hz_line_color"] = color if color is not None else "#343434"
     style["vt_line_type"] = 0  # 0 solid, 1 dashed, 2 dotted
     style["hz_line_type"] = 0
     style["vt_line_width"] = 2 if color is None else 0
@@ -40,8 +44,9 @@ def node_bg_style(style: Dict, clade: str, bg_color: str = None):
         "G_": "#fdb3b3",
         "GH": "#feab8d",
         "GR": "#fe8d8d",
+        "GV": "#f08bb5",
         "S_": "#b3ffb3",
-        "V_": "#f0b3f0",
+        "V_": "#ffddff",
         "L_": "White",
         "O_": "White",
     }
@@ -58,6 +63,7 @@ class PhyloIMG:
             "G_",
             "GH",
             "GR",
+            "GV",
             "S_",
             "V_",
             "L_",
@@ -67,6 +73,7 @@ class PhyloIMG:
             "G_": [],
             "GH": [],
             "GR": [],
+            "GV": [],
             "S_": [],
             "V_": [],
             "L_": [],
@@ -78,7 +85,7 @@ class PhyloIMG:
         )  # list of internal nodes whose bg color has been changed CURRENTLY NOT USED
         self.nodes_per_clade = {}  # internal_node -> number of leaves in each clade
         self.tree = self.get_tree(self.file, is_quoted=is_quoted)
-
+        
     def get_tree(self, file: str, is_quoted: bool) -> Tree:
         """
         Creates a newick tree where leafs are colored base on the tag in name, and background base on the clade grouping.
@@ -120,9 +127,9 @@ class PhyloIMG:
             - str / None : the color for that clade if any
         """
         # rapidnj tree option
-        # name_color = name.split("color=")
+        name_color = name.split("color=")
         # IQ tree option
-        name_color = name.split("____color__")
+        # name_color = name.split("____color__")
         clade = name_color[0][0:2]
         if clade == "Gn":
             clade = "G_"
@@ -183,6 +190,7 @@ class PhyloIMG:
         clade: str,
         clade_total: int,
         coverage: float = 0.6,
+        max_cov: float = 1,
         rooting: bool = False,
     ) -> Tuple[TreeNode, float]:
         """
@@ -197,6 +205,7 @@ class PhyloIMG:
         Return the internal node where proportion of GH to other clade is the highest
         """
         min_size = coverage * clade_total
+        max_size = max_cov * clade_total
         node_details = {}  # node -> density of [clade]
         for leaf in tree.traverse():
             if leaf.is_leaf() or leaf.is_root():
@@ -209,7 +218,7 @@ class PhyloIMG:
                 if not rooting:
                     self.nodes_per_clade[leaf] = node_per_clade
             # Finding internal nodes that satisfy coverage criteria
-            if node_per_clade.get(clade, 0) >= min_size:
+            if node_per_clade.get(clade, 0) >= min_size and node_per_clade.get(clade, 0) <= max_size:
                 density = self.calculate_density(node_per_clade, clade)
                 coverage = node_per_clade[clade] / clade_total * 100
                 node_details[leaf] = (density, coverage, node_per_clade)
@@ -234,17 +243,18 @@ class PhyloIMG:
             - clade(str): the clade to color
         """
         coverage = (
-            0.9
+            0.8
             if clade == "G_"
             else 0.85
             if clade == "GR"
-            else 0.84
+            else 0.5
             if clade == "GH"
+            else 0.8 if clade == "GV"
             else 0.5
         )
         clade_total = len(self.clades[clade])
         node, density_coverage_breakdown = self.max_ancestor(
-            tree, clade=clade, clade_total=clade_total, coverage=coverage
+            tree, clade=clade, clade_total=clade_total, coverage=coverage, max_cov= 0.9 if clade == "GH" else 0.9 if clade == "G" else 1
         )
         node.img_style = node_bg_style(node.img_style, clade)
         print(
@@ -276,7 +286,10 @@ def _parse_args():
         epilog="If you notice any issues, please open one over at https://github.com/ElasticBottle/GISAID-Analysis-Update ",
     )
     parser.add_argument(
-        "file", type=str, default="", help="file path of the NEWICK tree to parse",
+        "file",
+        type=str,
+        default="",
+        help="file path of the NEWICK tree to parse",
     )
     parser.add_argument(
         "-o",
@@ -333,7 +346,9 @@ def main():
     start = time.time()
     img = PhyloIMG(file=args.file, is_quoted=args.is_quoted)
     img(
-        output=args.out, dpi=args.dpi, width=args.width,
+        output=args.out,
+        dpi=args.dpi,
+        width=args.width,
     )
     end = time.time()
     print(f"Time taken: {end - start:.2f}s")
