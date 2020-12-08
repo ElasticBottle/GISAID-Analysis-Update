@@ -16,55 +16,59 @@ The summary includes:
 - Convertor from nwk file to custom figtree file
 - Utility for extracting .tar files
 
-## Using the Tool
+## Setting up
 
-### Setting up
-
-1. Ensure that you have python 3.8 installed:
+1. Ensure that you have python 3.6 installed:
     - `pip install pipenv`
 2. After which, clone the tool to your desired location
    - `git clone https://github.com/ElasticBottle/GISAID-Analysis-Update.git`
-3. Then run  `pipenv install` in the `dir` of the tool.
+3. Then run  `pipenv install` in the `directory` of the tool.
+
+## Using the tool
 
 ### Generating Phylogenetic Tree
+
+In the directory of the tool:
+
+Run in shell one of the following commands for `FastTree`, `RapinNj`, and `iqTreeFile` respectively.
+
+```python
+python phylo_updated.py path_to\fasttree.tree --output path_to_output\fast.svg --root-on "S_" --clade-color-density-coverage .\clade_del.json --display --rapid-fasttree-color-marker
+```
+
+```python
+python phylo_updated.py path_to\fnb_all_rapidnj.nwk --output path_to_output\rapid.svg --root-on "S_" --clade-color-density-coverage .\clade_del.json --display --rapid-fasttree-color-marker --quoted
+```
+
+```python
+python phylo_updated.py path_to\iqtree.treefile --output path_to_output\iq.svg --root-on "S_" --clade-color-density-coverage .\clade_del.json --display --iqtree-color-marker
+```
+
+For more options, run `python phylo.py -h` in shell.
+
+Alternatively, you might want to use the web based [phyloTreeMaker](https://mendel3.bii.a-star.edu.sg/METHODS/corona/current/phyloTreeMaker/build/) built off this script.
+
+### Generating Clade Progression and Geo Clade Graphs
 
 In the directory of the tool:
 
 Run in shell
 
 ```python
-python phylo.py INPUT_FILE.nwk
+python graph_plot.py path_to\clade_progression.tsv path_to\geoclade.tsv -co path_to\clade.png -go path_to\geo.png
 ```
 
-Optionally output path can be specified with `-o OUTPUT_FOLDER` flag
+Run `python graph_plot.py -h` for more detials on the various options.
 
-For more options, run `python phylo.py -h` in shell
-
-### Generating Clade Progression and Geo Clade Graphs
-
-In the directory of the tool:
-
-```python
-python graph_plot.py CLADE_PROGRESSION_INPUT_FILE GEOCLADE_INPUT_FILE
-```
-
-Optionally `-co CLADE_PROG_OUT_FILE.png` and `-go  GEOCLADE_OUT_FILE.png` can be used to specify the output file path for the respective graphs.
-
-Run `python graph_plot.py -h` for all the options.
+## Extras
 
 ### NWK to FigTree file convertor
 
 [FigTree](http://tree.bio.ed.ac.uk/software/figtree/) saves it's file in a custom NEXUS file format
 
-This tool eliminates the need for opening and saving the file to generate the proper formatting for the Phylogenetic tree to display properly.
-
-This tool assumes that your tree **has quoted node names**. Should be a quick fix to cater to non-quoted names if need be.
-
-```python 
+```python
 python nwk_to_fig.py -i INPUT_FILE_LOC -o OUTPUT_FILE_LOC
 ```
-
-both input and output file parameters are optional.
 
 `python nwk_to_fig.py -h` for the full details.
 
