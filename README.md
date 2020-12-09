@@ -33,15 +33,15 @@ In the directory of the tool:
 Run in shell one of the following commands for `FastTree`, `RapinNj`, and `iqTreeFile` respectively.
 
 ```python
-python phylo_updated.py path_to\fasttree.tree --output path_to_output\fast.svg --root-on "S_" --clade-color-density-coverage .\clade_del.json --display --rapid-fasttree-color-marker
+python phylo_updated.py path_to\fasttree.tree -o path_to_output\fast.svg --root-on "S_" --clade-color-density-coverage .\clade_del.json --display --rapid-fasttree-color-marker
 ```
 
 ```python
-python phylo_updated.py path_to\fnb_all_rapidnj.nwk --output path_to_output\rapid.svg --root-on "S_" --clade-color-density-coverage .\clade_del.json --display --rapid-fasttree-color-marker --quoted
+python phylo_updated.py path_to\fnb_all_rapidnj.nwk -o path_to_output\rapid.svg --root-on "S_" --clade-color-density-coverage .\clade_del.json --display --rapid-fasttree-color-marker --quoted
 ```
 
 ```python
-python phylo_updated.py path_to\iqtree.treefile --output path_to_output\iq.svg --root-on "S_" --clade-color-density-coverage .\clade_del.json --display --iqtree-color-marker
+python phylo_updated.py path_to\iqtree.treefile -o path_to_output\iq.svg --root-on "S_" --clade-color-density-coverage .\clade_del.json --display --iqtree-color-marker
 ```
 
 For more options, run `python phylo.py -h` in shell.
