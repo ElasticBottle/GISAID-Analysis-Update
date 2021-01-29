@@ -407,12 +407,12 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
         - axs: The maplotlib Axs to plot the pie chart on
     """
 
-    def get_index(index: int) -> List[int]:
-        index -= 1
-        if index >= 3:
-            index -= 3
-            return [1, index]
-        return [0, index]
+    # def get_index(index: int) -> List[int]:
+    #     index -= 1
+    #     if index >= 6:
+    #         index -= 6
+    #         return [1, index]
+    #     return [0, index]
 
     labels = OrderedDict(
         [
@@ -446,16 +446,22 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
         "V": "#ff99ff",
     }
     to_hatch = ["G+S477X", "GH+S477X", "GR+S477X", "GV+S477X"]
-    indices = get_index(index)
+    #indices = get_index(index)
     # print(title, values)
     values.rename(index=labels, inplace=True)
     # print("renamed", values)
     normalize = values.values.sum(axis=0) != 0
 
-    axs[indices[0], indices[1]].set_title(label=title, fontdict={"fontsize": 10})
-    pie = axs[indices[0], indices[1]].pie(
+    # axs[indices[0], indices[1]].set_title(label=title, fontdict={"fontsize": 10})
+    # pie = axs[indices[0], indices[1]].pie(
+    #     values.values, normalize=normalize, labeldistance=None, colors=colors.values()
+    # )
+    
+    axs[index-1].set_title(label=title, fontdict={"fontsize": 8})
+    pie = axs[index-1].pie(
         values.values, normalize=normalize, labeldistance=None, colors=colors.values()
     )
+    
     plotted_val = values[values > 0]
     plotted_clades = sorted(
         plotted_val.index, key=lambda x: plotted_val[x], reverse=True
@@ -494,22 +500,33 @@ def generate_geoclade_progression(file: str, out: str):
         "NorthAmerica",
         "SouthAmerica",
     ]
-    continents_index = [2, 3, 5, 6, 1, 4]
+    #continents_index = [2, 3, 5, 6, 1, 4]
+    continents_index = [3, 2, 1, 4, 5, 6]
     dfs = make_df(file, continents)
-    fig, axs = plt.subplots(2, 3)
-    patches = {}
+    fig, axs = plt.subplots(1, 6, figsize=(10,4),
+                            #gridspec_kw={'wspace':1.75}
+                        )
+    patches = {} 
     for i, item in enumerate(dfs.items()):
         title, chart_labels = item
         graph_index = continents_index[i]
         patches.update(make_pie_chart(graph_index, chart_labels, title, axs))
-    axs[1, 0].legend(
+    legend_ax = axs[1]
+    fig.legend(
         handles=list(patches.values()),
         labels=list(patches.keys()),
-        ncol=5,
-        loc="lower center",
-        bbox_to_anchor=(1.7, -0.46),
+        ncol=6,
+        loc="upper left",
+        #bbox_to_anchor=(0.5, 0.05),
+        bbox_to_anchor=(0.1, 0.05, 0.8, 0.25),
+        mode='expand',
+        borderaxespad=0
     )
-    fig.savefig(out, dpi=300)
+    
+    # for i in np.arange(1,6):
+    #     axs[1,i].set_visible(False)
+        
+    fig.savefig(out, dpi=300, bbox_inches='tight')
 
 
 def _parse_args():
