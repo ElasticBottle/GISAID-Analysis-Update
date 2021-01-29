@@ -203,7 +203,11 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + 0.2, box.width, box.height * 0.85])
     ax.legend(ncol=5, loc="lower center", bbox_to_anchor=(0.48, -0.45))
-    fig.savefig(out, dpi=300)
+    
+    for item in [fig, ax]:
+        item.patch.set_visible(False)
+        
+    fig.savefig(out, dpi=300, bbox_inches='tight')
     return fig, ax
 
 
