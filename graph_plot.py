@@ -37,14 +37,14 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
             ("S", "#c6e0b4"),
             ("V", "#ffccff"),
             ("G", "#ffcccc"),
-            ("G+S477X", "#ffcccc"),
+            ("G+RBDx", "#ffcccc"),
             ("GH", "#f5b183"),
-            ("GH+S477X", "#f5b183"),
+            ("GH+RBDx", "#f5b183"),
             ("GR", "#fe7c80"),
-            ("GR+S477X", "#fe7c80"),
+            ("GR+RBDx", "#fe7c80"),
         ]
     )
-    to_hatch = ["G+S477X", "GH+S477X", "GR+S477X"]
+    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx"]
     non_g_clades = [
         "L",
         "O",
@@ -59,9 +59,9 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
         "O": 4,
         "S": 5,
         "V": 6,
-        "G, G+S477X": 2,
-        "GH, GH+S477X": 1,
-        "GR, GR+S477X": 0,
+        "G, G+RBDx": 2,
+        "GH, GH+RBDx": 1,
+        "GR, GR+RBDx": 0,
     }
     # pallette = OrderedDict(
     #     [
@@ -72,9 +72,9 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
     #         ("GH", "#f5b183"),
     #         ("GR", "#fe7c80"),
     #         ("O", "#7f7f7f"),
-    #         # ("G+S477X", "#ffcccc"),
-    #         # ("GH+S477X", "#f5b183"),
-    #         # ("GR+S477X", "#fe7c80"),
+    #         # ("G+RBDx", "#ffcccc"),
+    #         # ("GH+RBDx", "#f5b183"),
+    #         # ("GR+RBDx", "#fe7c80"),
     #     ]
     # )
     # order = {
@@ -174,16 +174,16 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
             ("L", "#d9d9d9"),
             ("V", "#ffccff"),
             ("G", "#ffcccc"),
-            ("G+S477X", "#ffcccc"),
+            ("G+RBDx", "#ffcccc"),
             ("GV", "#f08bb5"),
-            ("GV+S477X", "#f08bb5"),
+            ("GV+RBDx", "#f08bb5"),
             ("GH", "#f5b183"),
-            ("GH+S477X", "#f5b183"),
+            ("GH+RBDx", "#f5b183"),
             ("GR", "#fe7c80"),
-            ("GR+S477X", "#fe7c80"),
+            ("GR+RBDx", "#fe7c80"),
         ]
     )
-    to_hatch = ["G+S477X", "GH+S477X", "GR+S477X", "GV+S477X"]
+    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GV+RBDx"]
 
     fig, ax = plt.subplots()
     stacks = ax.stackplot(
@@ -252,25 +252,25 @@ def generate_clade_progression(file: str, out: str, is3d: bool):
         "L": 2,
         "V": 3,
         "G": 4,
-        "G+S477X": 5,
+        "G+RBDx": 5,
         "GV": 6,
-        "GV+S477X": 7,
+        "GV+RBDx": 7,
         "GH": 8,
-        "GH+S477X": 9,
+        "GH+RBDx": 9,
         "GR": 10,
-        "GR+S477X":11,
+        "GR+RBDx":11,
     }
 
     labels = OrderedDict(
         [
             ("G", "G"),
-            ("Gn", "G+S477X"),
+            ("Gn", "G+RBDx"),
             ("GH", "GH"),
-            ("GHn", "GH+S477X"),
+            ("GHn", "GH+RBDx"),
             ("GR", "GR"),
-            ("GRn", "GR+S477X"),
+            ("GRn", "GR+RBDx"),
             ("GV", "GV"),
-            ("GVn", "GV+S477X"),
+            ("GVn", "GV+RBDx"),
             ("O", "O"),
             ("S", "S"),
             ("L", "L"),
@@ -425,31 +425,31 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
             ("L", "L"),
             ("V", "V"),
             ("G", "G"),
-            ("Gn", "G+S477X"),
+            ("Gn", "G+RBDx"),
             ("GH", "GH"),
-            ("GHn", "GH+S477X"),
+            ("GHn", "GH+RBDx"),
             ("GR", "GR"),
-            ("GRn", "GR+S477X"),
+            ("GRn", "GR+RBDx"),
             ("GV", "GV"),
-            ("GVn", "GV+S477X"),
+            ("GVn", "GV+RBDx"),
         ]
     )
     # Must correspond to order in data
     colors = {
         "G": "#ffcccc",
-        "G+S477X": "#ffcccc",
+        "G+RBDx": "#ffcccc",
         "GH": "#f4b183",
-        "GH+S477X": "#f4b183",
+        "GH+RBDx": "#f4b183",
         "GR": "#ff7c80",
-        "GR+S477X": "#ff7c80",
+        "GR+RBDx": "#ff7c80",
         "GV": "#f08bb5",
-        "GV+S477X": "#f08bb5",
+        "GV+RBDx": "#f08bb5",
         "L": "#d9d9d9",
         "O": "#808080",
         "S": "#70ad47",
         "V": "#ff99ff",
     }
-    to_hatch = ["G+S477X", "GH+S477X", "GR+S477X", "GV+S477X"]
+    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GV+RBDx"]
     #indices = get_index(index)
     # print(title, values)
     values.rename(index=labels, inplace=True)
