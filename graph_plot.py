@@ -42,9 +42,11 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
             ("GH+RBDx", "#f5b183"),
             ("GR", "#fe7c80"),
             ("GR+RBDx", "#fe7c80"),
+            ("GRY", "#fed88d"),
+            ("GRY+RBDx", "#fed88d"),
         ]
     )
-    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx"]
+    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GRY+RBDx"]
     non_g_clades = [
         "L",
         "O",
@@ -55,12 +57,13 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
     g_clades = df.columns.difference(non_g_clades).tolist()
     g_clade_len = len(g_clades)
     order = {
-        "L": 3,
-        "O": 4,
-        "S": 5,
-        "V": 6,
-        "G, G+RBDx": 2,
-        "GH, GH+RBDx": 1,
+        "L": 4,
+        "O": 5,
+        "S": 6,
+        "V": 7,
+        "G, G+RBDx": 3,
+        "GH, GH+RBDx": 2,
+        "GRY, GRY+RBDx": 1,
         "GR, GR+RBDx": 0,
     }
     # pallette = OrderedDict(
@@ -181,9 +184,11 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
             ("GH+RBDx", "#f5b183"),
             ("GR", "#fe7c80"),
             ("GR+RBDx", "#fe7c80"),
+            ("GRY", "#fed88d"),
+            ("GRY+RBDx", "#fed88d"),
         ]
     )
-    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GV+RBDx"]
+    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GV+RBDx", "GRY+RBDx"]
 
     fig, ax = plt.subplots()
     stacks = ax.stackplot(
@@ -247,7 +252,7 @@ def generate_clade_progression(file: str, out: str, is3d: bool):
     """
     df = pd.read_csv(file, sep="\t", skiprows=1, index_col=0,)
     insert_order = {
-        "O": 0,
+        "Other": 0,
         "S": 1,
         "L": 2,
         "V": 3,
@@ -259,6 +264,8 @@ def generate_clade_progression(file: str, out: str, is3d: bool):
         "GH+RBDx": 9,
         "GR": 10,
         "GR+RBDx":11,
+        "GRY": 12,
+        "GRY+RBDx":13,
     }
 
     labels = OrderedDict(
@@ -269,9 +276,11 @@ def generate_clade_progression(file: str, out: str, is3d: bool):
             ("GHn", "GH+RBDx"),
             ("GR", "GR"),
             ("GRn", "GR+RBDx"),
+            ("GRY", "GRY"),
+            ("GRYn", "GRY+RBDx"),
             ("GV", "GV"),
             ("GVn", "GV+RBDx"),
-            ("O", "O"),
+            ("Other", "O"),
             ("S", "S"),
             ("L", "L"),
             ("V", "V"),
@@ -420,7 +429,7 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
 
     labels = OrderedDict(
         [
-            ("O", "O"),
+            ("Other", "O"),
             ("S", "S"),
             ("L", "L"),
             ("V", "V"),
@@ -430,6 +439,8 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
             ("GHn", "GH+RBDx"),
             ("GR", "GR"),
             ("GRn", "GR+RBDx"),
+            ("GRY", "GRY"),
+            ("GRYn", "GRY+RBDx"),
             ("GV", "GV"),
             ("GVn", "GV+RBDx"),
         ]
@@ -442,6 +453,8 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
         "GH+RBDx": "#f4b183",
         "GR": "#ff7c80",
         "GR+RBDx": "#ff7c80",
+        "GRY": "#fed88d",
+        "GRY+RBDx": "#fed88d",
         "GV": "#f08bb5",
         "GV+RBDx": "#f08bb5",
         "L": "#d9d9d9",
@@ -449,7 +462,7 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
         "S": "#70ad47",
         "V": "#ff99ff",
     }
-    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GV+RBDx"]
+    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GRY+RBDx", "GV+RBDx"]
     #indices = get_index(index)
     # print(title, values)
     values.rename(index=labels, inplace=True)
