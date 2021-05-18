@@ -212,7 +212,12 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     for item in [fig, ax]:
         item.patch.set_visible(False)
         
+    # Added in April/May 2021.
+    sns.despine(ax=ax)
+        
     fig.savefig(out, dpi=300, bbox_inches='tight')
+    
+    
     return fig, ax
 
 
