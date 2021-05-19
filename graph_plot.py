@@ -207,13 +207,65 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     ax.margins(y=0)
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + 0.2, box.width, box.height * 0.85])
-    ax.legend(ncol=5, loc="lower center", bbox_to_anchor=(0.48, -0.45))
+    ax.legend(ncol=5, loc="lower center", 
+              # Adjusted in April/May 2021.
+              bbox_to_anchor=(0.6, -0.45))
     
     for item in [fig, ax]:
         item.patch.set_visible(False)
         
     # Added in April/May 2021.
-    sns.despine(ax=ax)
+    ## Add another x-axis!
+    sns.despine(ax=ax, top=True, bottom=False, 
+                right=False, trim=True,
+                offset={"right": 75, "bottom":15})
+    #ax.axvline(ax.get_xlim()[1]*0.9999, color='k',lw=2)
+    ax.tick_params(labelbottom=True, labeltop=False, 
+                    labelleft=True, labelright=True,
+                    bottom=True, top=False, 
+                    left=True, right=True)
+                    
+    ## Annotate.
+    anno_palette = {
+        "G": "#ffcccc",
+        "GR": "#ff7c80",
+        "GH": "#f4b183",
+        "GRY": "#fed88d"
+    }
+    
+    anno_labels = {
+        "G": "Includes B.1.617+",
+        "GR": "Includes P.1",
+        "GH": "Includes B.1.351\nand B.1.429",
+        "GRY": "GRY = B.1.1.7"
+    }
+    
+    anno_positions = {
+        "GRY": 0.6,
+        "GR": 0.23,
+        "GH": 0.12,
+        "G": 0.025,
+    }
+    
+    for clade in anno_labels.keys():
+        ax.annotate(
+            anno_labels[clade],
+            xy=(0.97, anno_positions[clade]), xycoords='axes fraction',
+            xytext=(0, 0), textcoords='offset points',
+            fontsize=8,
+            bbox=dict(boxstyle="round", 
+                      fc=anno_palette[clade],
+                      ec=anno_palette[clade])
+        )
+        
+    ax.annotate('Small and/or Variable\nSample Sizes',
+        fontsize=8, color='#8da9db',
+        xy=(0.78, 0.22), xycoords='figure fraction',
+        xytext=(0.82, 0.22), textcoords='figure fraction',
+        arrowprops=dict(facecolor='#8da9db', 
+                        edgecolor='#8da9db',
+                        width=0.5),
+        horizontalalignment='left', verticalalignment='center')
         
     fig.savefig(out, dpi=300, bbox_inches='tight')
     
