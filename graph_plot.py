@@ -234,7 +234,7 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     }
     
     anno_labels = {
-        "G": "Includes B.1.617+",
+        "G": "Includes B.1.617+\nand B.1.525",
         "GR": "Includes P.1",
         "GH": "Includes B.1.351\nand B.1.429",
         "GRY": "GRY = B.1.1.7"
@@ -252,7 +252,7 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
             anno_labels[clade],
             xy=(0.97, anno_positions[clade]), xycoords='axes fraction',
             xytext=(0, 0), textcoords='offset points',
-            fontsize=8,
+            fontsize=7,
             bbox=dict(boxstyle="round", 
                       fc=anno_palette[clade],
                       ec=anno_palette[clade])
@@ -531,7 +531,7 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
     #     values.values, normalize=normalize, labeldistance=None, colors=colors.values()
     # )
     
-    axs[index-1].set_title(label=title, fontdict={"fontsize": 8})
+    axs[index-1].set_title(label=title.replace(" (+", "\n(+ "), fontdict={"fontsize": 9})
     pie = axs[index-1].pie(
         values.values, normalize=normalize, labeldistance=None, colors=colors.values()
     )
