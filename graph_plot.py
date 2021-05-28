@@ -242,9 +242,9 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     
     anno_positions = {
         "GRY": 0.6,
-        "GR": 0.23,
-        "GH": 0.12,
-        "G": 0.025,
+        "GR": 0.3,
+        "GH": 0.19,
+        "G": 0.08,
     }
     
     for clade in anno_labels.keys():
