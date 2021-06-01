@@ -252,7 +252,7 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
             anno_labels[clade],
             xy=(0.97, anno_positions[clade]), xycoords='axes fraction',
             xytext=(0, 0), textcoords='offset points',
-            fontsize=7,
+            fontsize=6,
             bbox=dict(boxstyle="round", 
                       fc=anno_palette[clade],
                       ec=anno_palette[clade])
