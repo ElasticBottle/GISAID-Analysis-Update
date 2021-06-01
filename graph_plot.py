@@ -236,7 +236,7 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     anno_labels = {
         "G": "Includes Delta B.1.617+\nand Eta B.1.525",
         "GR": "Includes Gamma P.1",
-        "GH": "Includes Beta B.1.351\nand Episilon B.1.429",
+        "GH": "Includes Beta B.1.351\nand Epsilon B.1.429",
         "GRY": "GRY = Alpha B.1.1.7"
     }
     
