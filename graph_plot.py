@@ -12,6 +12,49 @@ import seaborn as sns
 
 plt.rcParams['svg.fonttype'] = 'none'
 
+# labels = OrderedDict(
+#     [
+#         ("G", "G"),
+#         ("Gn", "G+RBDx"),
+#         ("GH", "GH"),
+#         ("GHn", "GH+RBDx"),
+#         ("GR", "GR"),
+#         ("GRn", "GR+RBDx"),
+#         ("GRY", "GRY"),
+#         ("GRYn", "GRY+RBDx"),
+#         ("GV", "GV"),
+#         ("GVn", "GV+RBDx"),
+#         ("GK", "GK"),
+#         ("GKn", "GK+RBDx"),
+#         ("L", "L"),
+#         ("Other", "O"),
+#         ("S", "S"),
+#         ("V", "V"),
+#     ]
+# )
+# 
+# color_palette = OrderedDict(
+#     [
+#         ("L", "#d9d9d9"),
+#         ("O", "#7f7f7f"),
+#         ("S", "#c6e0b4"),
+#         ("V", "#ffccff"),
+#         ("G", "#ffcccc"),
+#         ("G+RBDx", "#ffcccc"),
+#         ("GH", "#f5b183"),
+#         ("GH+RBDx", "#f5b183"),
+#         ("GR", "#fe7c80"),
+#         ("GR+RBDx", "#fe7c80"),
+#         ("GRY", "#fed88d"),
+#         ("GRY+RBDx", "#fed88d"),
+#         ("GK", "#ffd5ab"),
+#         ("GK+RBDx", "#ffd5ab"),
+#     ]
+# )
+# 
+# to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", 
+#             "GV+RBDx", "GRY+RBDx", "GK+RBDx"]
+
 def remove_borders():
     _, ax = plt.subplots()
     right_side = ax.spines["right"]
@@ -31,7 +74,7 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
         print(result)
         return result
 
-    pallette = OrderedDict(
+    color_palette = OrderedDict(
         [
             ("L", "#d9d9d9"),
             ("O", "#7f7f7f"),
@@ -45,9 +88,14 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
             ("GR+RBDx", "#fe7c80"),
             ("GRY", "#fed88d"),
             ("GRY+RBDx", "#fed88d"),
+            ("GK", "#ffd5ab"),
+            ("GK+RBDx", "#ffd5ab"),
         ]
     )
-    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GRY+RBDx"]
+    to_hatch = ["G+RBDx", "GH+RBDx", 
+                "GR+RBDx", "GRY+RBDx",
+                "GK+RBDX"]
+                
     non_g_clades = [
         "L",
         "O",
@@ -58,38 +106,16 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
     g_clades = df.columns.difference(non_g_clades).tolist()
     g_clade_len = len(g_clades)
     order = {
-        "L": 4,
-        "O": 5,
-        "S": 6,
-        "V": 7,
-        "G, G+RBDx": 3,
-        "GH, GH+RBDx": 2,
+        "V": 8,
+        "S": 7,
+        "O": 6,
+        "L": 5,
+        "G, G+RBDx": 4,
+        "GH, GH+RBDx": 3,
+        "GK, GK+RBDx": 2,
         "GRY, GRY+RBDx": 1,
         "GR, GR+RBDx": 0,
     }
-    # pallette = OrderedDict(
-    #     [
-    #         ("S", "#c6e0b4"),
-    #         ("L", "#d9d9d9"),
-    #         ("V", "#ffccff"),
-    #         ("G", "#ffcccc"),
-    #         ("GH", "#f5b183"),
-    #         ("GR", "#fe7c80"),
-    #         ("O", "#7f7f7f"),
-    #         # ("G+RBDx", "#ffcccc"),
-    #         # ("GH+RBDx", "#f5b183"),
-    #         # ("GR+RBDx", "#fe7c80"),
-    #     ]
-    # )
-    # order = {
-    #     "S": 0,
-    #     "L": 1,
-    #     "V": 2,
-    #     "G": 3,
-    #     "GH": 4,
-    #     "GR": 5,
-    #     "O": 6,
-    # }
 
     fig = plt.figure()
     ax = plt.gca(projection="3d")
@@ -102,8 +128,8 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
         if idx in non_g_clades:
             ys = series.tolist()
             vert[order[idx] - 3] = list(zip(list(reversed(xs)), ys))
-    non_g_pallette = [x for x in pallette.items() if x[0] in non_g_clades]
-    colors = sorted(non_g_pallette, key=lambda x: order.get(x[0]))
+    non_g_color_palette = [x for x in color_palette.items() if x[0] in non_g_clades]
+    colors = sorted(non_g_color_palette, key=lambda x: order.get(x[0]))
     colors = dict((x, y) for x, y in colors)
     non_g_poly = PolyCollection(vert, facecolors=colors.values())
     ax.add_collection3d(non_g_poly, zs=range(3, non_g_clade_len + 3), zdir="y")
@@ -116,7 +142,7 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
             stacks = ax.stackplot(
                 list(reversed(xs)),
                 *value,
-                colors=[x[1] for x in pallette.items() if x[0] == g_clades[i]],
+                colors=[x[1] for x in color_palette.items() if x[0] == g_clades[i]],
             )
             for stack, key in zip(stacks, [g_clades[i], g_clades[i + 1]]):
                 stack.set_alpha(0.8)
@@ -171,7 +197,7 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
 
 
 def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
-    pallette = OrderedDict(
+    color_palette = OrderedDict(
         [
             ("O", "#7f7f7f"),
             ("S", "#c6e0b4"),
@@ -187,16 +213,19 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
             ("GR+RBDx", "#fe7c80"),
             ("GRY", "#fed88d"),
             ("GRY+RBDx", "#fed88d"),
+            ("GK", "#ffd5ab"),
+            ("GK+RBDx", "#ffd5ab"),
         ]
     )
-    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GV+RBDx", "GRY+RBDx"]
+    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", 
+                "GV+RBDx", "GRY+RBDx", "GK+RBDx"]
 
     fig, ax = plt.subplots()
     stacks = ax.stackplot(
-        index, *values, labels=labels, colors=list(pallette.values()),
+        index, *values, labels=labels, colors=list(color_palette.values()),
     )
 
-    for stack, key in zip(stacks, pallette.keys()):
+    for stack, key in zip(stacks, color_palette.keys()):
         if key in to_hatch:
             stack.set_hatch("++")
 
@@ -207,10 +236,11 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     plt.xticks(rotation=90)
     ax.margins(y=0)
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0 + 0.2, box.width, box.height * 0.85])
-    ax.legend(ncol=5, loc="lower center", 
-              # Adjusted in April/May 2021.
-              bbox_to_anchor=(0.6, -0.45))
+    ax.set_position([box.x0, box.y0 + 0.2, box.width, box.height * 0.8])
+    # Adjusted in April/May 2021.
+    ax.legend(ncol=8, loc="lower center", 
+             prop=dict(size=7),
+             bbox_to_anchor=(0.5, -0.45))
     
     for item in [fig, ax]:
         item.patch.set_visible(False)
@@ -231,21 +261,25 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
         "G": "#ffcccc",
         "GR": "#ff7c80",
         "GH": "#f4b183",
-        "GRY": "#fed88d"
+        "GRY": "#fed88d",
+        "GK": "#ffd5ab"
     }
     
     anno_labels = {
-        "G": "Includes Delta B.1.617+\nand Eta B.1.525",
+        "GK": "GK = Delta B.1.617+",
+        "GRY": "GRY = Alpha B.1.1.7",
         "GR": "Includes Gamma P.1",
         "GH": "Includes Beta B.1.351\nand Epsilon B.1.429",
-        "GRY": "GRY = Alpha B.1.1.7"
+        "G": "Includes Eta B.1.525",
     }
     
     anno_positions = {
-        "GRY": 0.99,
-        "GR" : 0.93,
-        "GH" : 0.85,
-        "G"  : 0.7,
+        "GK" : 0.5,
+        
+        "GRY": 0.3,
+        "GR" : 0.2,
+        "GH" : 0.1,
+        "G"  : 0,
     }
     
     for clade in anno_labels.keys():
@@ -324,6 +358,8 @@ def generate_clade_progression(file: str, out: str, is3d: bool):
         "GR+RBDx":11,
         "GRY": 12,
         "GRY+RBDx":13,
+        "GK": 14,
+        "GK+RBDx":15,
     }
 
     labels = OrderedDict(
@@ -338,9 +374,11 @@ def generate_clade_progression(file: str, out: str, is3d: bool):
             ("GRYn", "GRY+RBDx"),
             ("GV", "GV"),
             ("GVn", "GV+RBDx"),
+            ("GK", "GK"),
+            ("GKn", "GK+RBDx"),
+            ("L", "L"),
             ("Other", "O"),
             ("S", "S"),
-            ("L", "L"),
             ("V", "V"),
         ]
     )
@@ -487,10 +525,6 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
 
     labels = OrderedDict(
         [
-            ("Other", "O"),
-            ("S", "S"),
-            ("L", "L"),
-            ("V", "V"),
             ("G", "G"),
             ("Gn", "G+RBDx"),
             ("GH", "GH"),
@@ -501,6 +535,12 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
             ("GRYn", "GRY+RBDx"),
             ("GV", "GV"),
             ("GVn", "GV+RBDx"),
+            ("GK", "GK"),
+            ("GKn", "GK+RBDx"),
+            ("L", "L"),
+            ("Other", "O"),
+            ("S", "S"),
+            ("V", "V")
         ]
     )
     # Must correspond to order in data
@@ -515,12 +555,14 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
         "GRY+RBDx": "#fed88d",
         "GV": "#f08bb5",
         "GV+RBDx": "#f08bb5",
+        "GK": "#ffd5ab",
+        "GK+RBDx": "#ffd5ab",
         "L": "#d9d9d9",
         "O": "#808080",
         "S": "#70ad47",
         "V": "#ff99ff",
     }
-    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GRY+RBDx", "GV+RBDx"]
+    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GRY+RBDx", "GV+RBDx", "GK+RBDx"]
     #indices = get_index(index)
     # print(title, values)
     values.rename(index=labels, inplace=True)
@@ -591,7 +633,7 @@ def generate_geoclade_progression(file: str, out: str):
     fig.legend(
         handles=list(patches.values()),
         labels=list(patches.keys()),
-        ncol=6,
+        ncol=8,
         loc="upper left",
         #bbox_to_anchor=(0.5, 0.05),
         bbox_to_anchor=(0.1, 0.05, 0.8, 0.25),
