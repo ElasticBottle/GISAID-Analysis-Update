@@ -8,8 +8,11 @@ from typing import Dict, List, Tuple, Union
 import numpy as np
 import pandas as pd
 
-#from ete3 import NodeStyle, Tree, TreeNode, TreeStyle
-from ete3.treeview.main import NodeStyle, Tree, TreeNode, TreeStyle
+## Use line below for use on MacOS
+from ete3 import NodeStyle, Tree, TreeNode, TreeStyle
+
+## Use line below for Debian/Windows
+#from ete3.treeview.main import NodeStyle, Tree, TreeNode, TreeStyle
 
 ALT_NAME = 0
 CLADE_COL= 0
@@ -80,7 +83,7 @@ def _parse_args():
     parser.add_argument(
         "-w",
         "--width",
-        default=5000,
+        default=7500,
         type=int,
         dest="width",
         help="Specifies the width of the image in pixel, the height is then automatically derived. Default 5000",
@@ -370,7 +373,7 @@ def get_max_ancestor(tree: TreeNode, clade: Union[str, List[str]], clade_details
     sorted_nodes = list(reversed(sorted(qualifying_list.keys(), key=lambda x: qualifying_list.get(x)[SCORE])))
     try:
         print(
-                f"{clade} coverage: {(qualifying_list[sorted_nodes[0]][1])* 100:.2f}%, density of coverage: {qualifying_list[sorted_nodes[0]][0] * 100:.2f}%"
+                f"{clade} density of coverage: {qualifying_list[sorted_nodes[0]][0] * 100:.2f}%; coverage: {(qualifying_list[sorted_nodes[0]][1])* 100:.2f}%"
             )
     except:
         raise Exception(f"Could not find any node to color for clade {clade} that fulfills criteria: {clade_details} ")

@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+plt.rcParams['svg.fonttype'] = 'none'
 
 def remove_borders():
     _, ax = plt.subplots()
@@ -165,7 +166,7 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
     # setting the view point
     ax.view_init(elev=15.0, azim=135)
     # plt.show()
-    plt.savefig(out, dpi=320)
+    plt.savefig(out, dpi=320, bbox_inches="tight")
     return fig, ax
 
 
@@ -241,10 +242,10 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     }
     
     anno_positions = {
-        "GRY": 0.92,
-        "GR" : 0.82,
-        "GH" : 0.75,
-        "G"  : 0.60,
+        "GRY": 0.99,
+        "GR" : 0.93,
+        "GH" : 0.85,
+        "G"  : 0.7,
     }
     
     for clade in anno_labels.keys():
@@ -267,7 +268,7 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
                         width=0.5),
         horizontalalignment='left', verticalalignment='center')
         
-    fig.savefig(out, dpi=300, bbox_inches='tight')
+    fig.savefig(out, dpi=320, bbox_inches='tight')
     
     
     return fig, ax
@@ -531,7 +532,8 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
     #     values.values, normalize=normalize, labeldistance=None, colors=colors.values()
     # )
     
-    axs[index-1].set_title(label=title.replace(" (+", "\n(+ "), fontdict={"fontsize": 9})
+    axs[index-1].set_title(label=title.replace(" (+", "\n(+ ").replace("America", " America"), 
+                           fontdict={"fontsize": 9})
     pie = axs[index-1].pie(
         values.values, normalize=normalize, labeldistance=None, colors=colors.values()
     )
