@@ -12,48 +12,91 @@ import seaborn as sns
 
 plt.rcParams['svg.fonttype'] = 'none'
 
-# labels = OrderedDict(
-#     [
-#         ("G", "G"),
-#         ("Gn", "G+RBDx"),
-#         ("GH", "GH"),
-#         ("GHn", "GH+RBDx"),
-#         ("GR", "GR"),
-#         ("GRn", "GR+RBDx"),
-#         ("GRY", "GRY"),
-#         ("GRYn", "GRY+RBDx"),
-#         ("GV", "GV"),
-#         ("GVn", "GV+RBDx"),
-#         ("GK", "GK"),
-#         ("GKn", "GK+RBDx"),
-#         ("L", "L"),
-#         ("Other", "O"),
-#         ("S", "S"),
-#         ("V", "V"),
-#     ]
-# )
+## VOC palette
+# color_palette = {
+#    "Alpha": "#c33531",
+#    "Beta": "#c331bf",
+#    "Gamma": "#e7800c",
+#    "Delta": "#0ce2e7",
 # 
-# color_palette = OrderedDict(
-#     [
-#         ("L", "#d9d9d9"),
-#         ("O", "#7f7f7f"),
-#         ("S", "#c6e0b4"),
-#         ("V", "#ffccff"),
-#         ("G", "#ffcccc"),
-#         ("G+RBDx", "#ffcccc"),
-#         ("GH", "#f5b183"),
-#         ("GH+RBDx", "#f5b183"),
-#         ("GR", "#fe7c80"),
-#         ("GR+RBDx", "#fe7c80"),
-#         ("GRY", "#fed88d"),
-#         ("GRY+RBDx", "#fed88d"),
-#         ("GK", "#ffd5ab"),
-#         ("GK+RBDx", "#ffd5ab"),
-#     ]
-# )
 # 
-# to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", 
-#             "GV+RBDx", "GRY+RBDx", "GK+RBDx"]
+#    "Epsilon": "#8e4e4d",
+#    "Zeta": "#2c6aae",
+#    "Eta": "#2cabae",
+#    "Theta": "#712cae",
+#    "Iota": "#abae2c",
+#    "Kappa": "#8d4d6b",
+#    "Lambda": "#2f2cae",
+# 
+#    "Others": "#666666",
+# 
+# #            "Variants of Interest": "#9e9595"
+# #            "Variants of Interest": "#ae2c6a"
+#    "Variants of Interest": "#999999",
+#      
+#    "Variants for Further Monitoring": "#b3b3b3",
+# }
+# 
+
+
+# Must correspond to order in geoclade.tsv
+labels = OrderedDict(
+    [
+        ("G", "G"),
+        ("Gn", "G+RBDx"),
+        
+        ("GH", "GH"),
+        ("GHn", "GH+RBDx"),
+        
+        ("GR", "GR"),
+        ("GRn", "GR+RBDx"),
+        
+        ("GRY", "GRY"),
+        ("GRYn", "GRY+RBDx"),
+        
+        ("GV", "GV"),
+        ("GVn", "GV+RBDx"),
+        
+        ("GK", "GK"),
+        ("GKn", "GK+RBDx"),
+        
+        ("L", "L"),
+        ("Other", "O"),
+        ("S", "S"),
+        ("V", "V"),
+    ]
+)
+
+
+color_palette = OrderedDict(
+        [
+            ("G", "#fdb3b3"),
+            ("G+RBDx", "#fdb3b3"),
+            
+            ("GH", "#feab8d"),
+            ("GH+RBDx", "#feab8d"),
+            
+            ("GR", "#fe8d8d"),
+            ("GR+RBDx", "#fe8d8d"),
+            
+            ("GRY", "#c33531"),
+            ("GRY+RBDx", "#c33531"),
+            
+            ("GV", "#f08bb5"),
+            ("GV+RBDx", "#f08bb5"),
+            
+            ("GK", "#0ce2e7"),
+            ("GK+RBDx", "#0ce2e7"),
+            
+            ("L", "#d9d9d9"),
+            ("O", "#7f7f7f"),
+            ("S", "#c6e0b4"),
+            ("V", "#ffccff"),
+        ]
+    )
+# 
+to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", 
+            "GV+RBDx", "GRY+RBDx", "GK+RBDx"]
 
 def remove_borders():
     _, ax = plt.subplots()
@@ -74,27 +117,27 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
         print(result)
         return result
 
-    color_palette = OrderedDict(
-        [
-            ("L", "#d9d9d9"),
-            ("O", "#7f7f7f"),
-            ("S", "#c6e0b4"),
-            ("V", "#ffccff"),
-            ("G", "#ffcccc"),
-            ("G+RBDx", "#ffcccc"),
-            ("GH", "#f5b183"),
-            ("GH+RBDx", "#f5b183"),
-            ("GR", "#fe7c80"),
-            ("GR+RBDx", "#fe7c80"),
-            ("GRY", "#fed88d"),
-            ("GRY+RBDx", "#fed88d"),
-            ("GK", "#ffd5ab"),
-            ("GK+RBDx", "#ffd5ab"),
-        ]
-    )
-    to_hatch = ["G+RBDx", "GH+RBDx", 
-                "GR+RBDx", "GRY+RBDx",
-                "GK+RBDX"]
+    # color_palette = OrderedDict(
+    #     [
+    #         ("L", "#d9d9d9"),
+    #         ("O", "#7f7f7f"),
+    #         ("S", "#c6e0b4"),
+    #         ("V", "#ffccff"),
+    #         ("G", "#fdb3b3"),
+    #         ("G+RBDx", "#fdb3b3"),
+    #         ("GH", "#feab8d"),
+    #         ("GH+RBDx", "#feab8d"),
+    #         ("GR", "#fe8d8d"),
+    #         ("GR+RBDx", "#fe8d8d"),
+    #         ("GRY", "#c33531"),
+    #         ("GRY+RBDx", "#c33531"),
+    #         ("GK", "#0ce2e7"),
+    #         ("GK+RBDx", "#0ce2e7"),
+    #     ]
+    # )
+    # to_hatch = ["G+RBDx", "GH+RBDx", 
+    #             "GR+RBDx", "GRY+RBDx",
+    #             "GK+RBDX"]
                 
     non_g_clades = [
         "L",
@@ -197,35 +240,37 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
 
 
 def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
-    color_palette = OrderedDict(
+    
+    # Order by plot order....
+    color_palette_stacked = OrderedDict(
         [
             ("O", "#7f7f7f"),
             ("S", "#c6e0b4"),
             ("L", "#d9d9d9"),
             ("V", "#ffccff"),
-            ("G", "#ffcccc"),
-            ("G+RBDx", "#ffcccc"),
+            ("G", "#fdb3b3"),
+            ("G+RBDx", "#fdb3b3"),
             ("GV", "#f08bb5"),
             ("GV+RBDx", "#f08bb5"),
-            ("GH", "#f5b183"),
-            ("GH+RBDx", "#f5b183"),
-            ("GR", "#fe7c80"),
-            ("GR+RBDx", "#fe7c80"),
-            ("GRY", "#fed88d"),
-            ("GRY+RBDx", "#fed88d"),
-            ("GK", "#ffd5ab"),
-            ("GK+RBDx", "#ffd5ab"),
+            ("GH", "#feab8d"),
+            ("GH+RBDx", "#feab8d"),
+            ("GR", "#fe8d8d"),
+            ("GR+RBDx", "#fe8d8d"),
+            ("GRY", "#c33531"),
+            ("GRY+RBDx", "#c33531"),
+            ("GK", "#0ce2e7"),
+            ("GK+RBDx", "#0ce2e7"),
         ]
     )
-    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", 
-                "GV+RBDx", "GRY+RBDx", "GK+RBDx"]
+    # to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", 
+    #             "GV+RBDx", "GRY+RBDx", "GK+RBDx"]
 
     fig, ax = plt.subplots()
     stacks = ax.stackplot(
-        index, *values, labels=labels, colors=list(color_palette.values()),
+        index, *values, labels=labels, colors=list(color_palette_stacked.values()),
     )
 
-    for stack, key in zip(stacks, color_palette.keys()):
+    for stack, key in zip(stacks, color_palette_stacked.keys()):
         if key in to_hatch:
             stack.set_hatch("++")
 
@@ -258,11 +303,11 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
                     
     ## Annotate.
     anno_palette = {
-        "G": "#ffcccc",
+        "G": "#fdb3b3",
         "GR": "#ff7c80",
         "GH": "#f4b183",
-        "GRY": "#fed88d",
-        "GK": "#ffd5ab"
+        "GRY": "#c33531",
+        "GK": "#0ce2e7"
     }
     
     anno_labels = {
@@ -483,7 +528,7 @@ def make_df(file: str, continents: List[str]) -> Dict[str, pd.Series]:
 
     def get_clade_value(f):
         clades, values = [], []
-        for _ in range(10):
+        for _ in range(16): ## EDIT THIS EVERY TIME YOU ADD A NEW CLADE.
             clade, value = f.readline().split("\t")
             assert clade is not None and value is not None
             assert len(clade) > 0 and len(value) > 0
@@ -523,50 +568,54 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
     #         return [1, index]
     #     return [0, index]
 
-    labels = OrderedDict(
-        [
-            ("G", "G"),
-            ("Gn", "G+RBDx"),
-            ("GH", "GH"),
-            ("GHn", "GH+RBDx"),
-            ("GR", "GR"),
-            ("GRn", "GR+RBDx"),
-            ("GRY", "GRY"),
-            ("GRYn", "GRY+RBDx"),
-            ("GV", "GV"),
-            ("GVn", "GV+RBDx"),
-            ("GK", "GK"),
-            ("GKn", "GK+RBDx"),
-            ("L", "L"),
-            ("Other", "O"),
-            ("S", "S"),
-            ("V", "V")
-        ]
-    )
+    # labels = OrderedDict(
+    #     [
+    #         ("G", "G"),
+    #         ("Gn", "G+RBDx"),
+    #         ("GH", "GH"),
+    #         ("GHn", "GH+RBDx"),
+    #         ("GR", "GR"),
+    #         ("GRn", "GR+RBDx"),
+    #         ("GRY", "GRY"),
+    #         ("GRYn", "GRY+RBDx"),
+    #         ("GV", "GV"),
+    #         ("GVn", "GV+RBDx"),
+    #         ("GK", "GK"),
+    #         ("GKn", "GK+RBDx"),
+    #         ("L", "L"),
+    #         ("Other", "O"),
+    #         ("S", "S"),
+    #         ("V", "V"),
+    #     ]
+    # )
+    
     # Must correspond to order in data
-    colors = {
-        "G": "#ffcccc",
-        "G+RBDx": "#ffcccc",
-        "GH": "#f4b183",
-        "GH+RBDx": "#f4b183",
-        "GR": "#ff7c80",
-        "GR+RBDx": "#ff7c80",
-        "GRY": "#fed88d",
-        "GRY+RBDx": "#fed88d",
-        "GV": "#f08bb5",
-        "GV+RBDx": "#f08bb5",
-        "GK": "#ffd5ab",
-        "GK+RBDx": "#ffd5ab",
-        "L": "#d9d9d9",
-        "O": "#808080",
-        "S": "#70ad47",
-        "V": "#ff99ff",
-    }
-    to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GRY+RBDx", "GV+RBDx", "GK+RBDx"]
+    # colors = {
+    #     "G": "#fdb3b3",
+    #     "G+RBDx": "#fdb3b3",
+    #     "GH": "#f4b183",
+    #     "GH+RBDx": "#f4b183",
+    #     "GR": "#ff7c80",
+    #     "GR+RBDx": "#ff7c80",
+    #     "GRY": "#c33531",
+    #     "GRY+RBDx": "#c33531",
+    #     "GV": "#f08bb5",
+    #     "GV+RBDx": "#f08bb5",
+    #     "GK": "#0ce2e7",
+    #     "GK+RBDx": "#0ce2e7",
+    #     "L": "#d9d9d9",
+    #     "O": "#808080",
+    #     "S": "#70ad47",
+    #     "V": "#ff99ff",
+    # }
+    # to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", "GRY+RBDx", "GV+RBDx", "GK+RBDx"]
     #indices = get_index(index)
     # print(title, values)
     values.rename(index=labels, inplace=True)
+    
+    # ## FOR DEBUG ##
     # print("renamed", values)
+    
     normalize = values.values.sum(axis=0) != 0
 
     # axs[indices[0], indices[1]].set_title(label=title, fontdict={"fontsize": 10})
@@ -577,7 +626,7 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
     axs[index-1].set_title(label=title.replace(" (+", "\n(+ ").replace("America", " America"), 
                            fontdict={"fontsize": 9})
     pie = axs[index-1].pie(
-        values.values, normalize=normalize, labeldistance=None, colors=colors.values()
+        values.values, normalize=normalize, labeldistance=None, colors=color_palette.values()
     )
     
     plotted_val = values[values > 0]
@@ -594,7 +643,7 @@ def make_pie_chart(index: int, values: pd.Series, title: str, axs):
             wedge[0].set_hatch("+++")
 
     wedges = {}
-    for key, value in colors.items():
+    for key, value in color_palette.items():
         patch = mpatches.Patch(
             facecolor=value, hatch="+++" if key in to_hatch else "", label=key
         )
@@ -627,9 +676,16 @@ def generate_geoclade_progression(file: str, out: str):
     patches = {} 
     for i, item in enumerate(dfs.items()):
         title, chart_labels = item
+        
+        # ## FOR DEBUG ##
+        # print(chart_labels)
+        
         graph_index = continents_index[i]
+        print(title)
         patches.update(make_pie_chart(graph_index, chart_labels, title, axs))
+        
     legend_ax = axs[1]
+    
     fig.legend(
         handles=list(patches.values()),
         labels=list(patches.keys()),
