@@ -64,6 +64,8 @@ labels = OrderedDict(
         ("Other", "O"),
         ("S", "S"),
         ("V", "V"),
+        
+        ("GRA", "GRA"),
     ]
 )
 
@@ -92,11 +94,14 @@ color_palette = OrderedDict(
             ("O", "#7f7f7f"),
             ("S", "#c6e0b4"),
             ("V", "#ffccff"),
+            
+            ("GRA", "#4d8c8d"),
         ]
     )
 # 
 to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", 
-            "GV+RBDx", "GRY+RBDx", "GK+RBDx"]
+            "GV+RBDx", "GRY+RBDx",
+            "GK+RBDx"]
 
 def remove_borders():
     _, ax = plt.subplots()
@@ -149,10 +154,11 @@ def plot_3d(index: pd.Index, df: pd.DataFrame, out: str):
     g_clades = df.columns.difference(non_g_clades).tolist()
     g_clade_len = len(g_clades)
     order = {
-        "V": 8,
-        "S": 7,
-        "O": 6,
-        "L": 5,
+        "GRA": 10,
+        "V": 9,
+        "S": 8,
+        "O": 7,
+        "L": 6,
         "G, G+RBDx": 4,
         "GH, GH+RBDx": 3,
         "GK, GK+RBDx": 2,
@@ -260,6 +266,7 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
             ("GRY+RBDx", "#c33531"),
             ("GK", "#0ce2e7"),
             ("GK+RBDx", "#0ce2e7"),
+            ("GRA", "#4d8c8d"),
         ]
     )
     # to_hatch = ["G+RBDx", "GH+RBDx", "GR+RBDx", 
@@ -283,7 +290,7 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + 0.2, box.width, box.height * 0.8])
     # Adjusted in April/May 2021.
-    ax.legend(ncol=8, loc="lower center", 
+    ax.legend(ncol=9, loc="lower center", 
              prop=dict(size=7),
              bbox_to_anchor=(0.5, -0.45))
     
@@ -306,6 +313,7 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
         "G": "#fdb3b3",
         "GR": "#ff7c80",
         "GH": "#f4b183",
+        "GRA": "#4d8c8d",
         "GRY": "#c33531",
         "GK": "#0ce2e7"
     }
@@ -313,6 +321,7 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     anno_labels = {
         "GK": "GK = Delta B.1.617+",
         "GRY": "GRY = Alpha B.1.1.7",
+        "GRA": "Includes B.1.1.529, BA.1, BA.2",
         "GR": "Includes Gamma P.1",
         "GH": "Includes Beta B.1.351\nand Epsilon B.1.429",
         "G": "Includes Eta B.1.525",
@@ -320,7 +329,7 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     
     anno_positions = {
         "GK" : 0.5,
-        
+        "GRA": 0.4,
         "GRY": 0.3,
         "GR" : 0.2,
         "GH" : 0.1,
@@ -340,8 +349,8 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
         
     ax.annotate('Small and/or Variable\nSample Sizes',
         fontsize=8, color='#8da9db',
-        xy=(0.78, 0.22), xycoords='figure fraction',
-        xytext=(0.82, 0.22), textcoords='figure fraction',
+        xy=(0.9, 0.22), xycoords='figure fraction',
+        xytext=(0.95, 0.22), textcoords='figure fraction',
         arrowprops=dict(facecolor='#8da9db', 
                         edgecolor='#8da9db',
                         width=0.5),
@@ -689,7 +698,9 @@ def generate_geoclade_progression(file: str, out: str):
     fig.legend(
         handles=list(patches.values()),
         labels=list(patches.keys()),
-        ncol=8,
+        ncol=9,
+        fontsize=8,
+        handletextpad=1,
         loc="upper left",
         #bbox_to_anchor=(0.5, 0.05),
         bbox_to_anchor=(0.1, 0.05, 0.8, 0.25),
