@@ -539,7 +539,7 @@ def make_df(file: str, continents: List[str]) -> Dict[str, pd.Series]:
 
     def get_clade_value(f):
         clades, values = [], []
-        for _ in range(16): ## EDIT THIS EVERY TIME YOU ADD A NEW CLADE.
+        for _ in range(17): ## EDIT THIS EVERY TIME YOU ADD A NEW CLADE.
             clade, value = f.readline().split("\t")
             assert clade is not None and value is not None
             assert len(clade) > 0 and len(value) > 0
@@ -705,7 +705,7 @@ def generate_geoclade_progression(file: str, out: str):
         handletextpad=1,
         loc="upper left",
         #bbox_to_anchor=(0.5, 0.05),
-        bbox_to_anchor=(0.1, 0.05, 0.8, 0.25),
+        bbox_to_anchor=(0.11, 0.05, 0.8, 0.25),
         mode='expand',
         borderaxespad=0
     )
