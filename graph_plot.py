@@ -321,7 +321,7 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     anno_labels = {
         "GK": "GK = Delta B.1.617+",
         "GRY": "GRY = Alpha B.1.1.7",
-        "GRA": "Includes B.1.1.529, BA.1, BA.2",
+        "GRA": "Includes B.1.1.529 and BA.x",
         "GR": "Includes Gamma P.1",
         "GH": "Includes Beta B.1.351\nand Epsilon B.1.429",
         "G": "Includes Eta B.1.525",
@@ -349,8 +349,8 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
         
     ax.annotate('Small and/or Variable\nSample Sizes',
         fontsize=8, color='#8da9db',
-        xy=(0.9, 0.22), xycoords='figure fraction',
-        xytext=(0.95, 0.22), textcoords='figure fraction',
+        xy=(0.97, 0.22), xycoords='figure fraction',
+        xytext=(0.99, 0.22), textcoords='figure fraction',
         arrowprops=dict(facecolor='#8da9db', 
                         edgecolor='#8da9db',
                         width=0.5),
@@ -414,6 +414,7 @@ def generate_clade_progression(file: str, out: str, is3d: bool):
         "GRY+RBDx":13,
         "GK": 14,
         "GK+RBDx":15,
+        "GRA": 16,
     }
 
     labels = OrderedDict(
@@ -430,6 +431,7 @@ def generate_clade_progression(file: str, out: str, is3d: bool):
             ("GVn", "GV+RBDx"),
             ("GK", "GK"),
             ("GKn", "GK+RBDx"),
+            ("GRA", "GRA"),
             ("L", "L"),
             ("Other", "O"),
             ("S", "S"),
