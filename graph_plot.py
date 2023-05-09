@@ -3,6 +3,7 @@ from collections import OrderedDict
 from typing import Dict, List
 
 from mpl_toolkits.mplot3d import Axes3D
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.collections import PolyCollection
@@ -11,6 +12,7 @@ import pandas as pd
 import seaborn as sns
 
 plt.rcParams['svg.fonttype'] = 'none'
+matplotlib.rcParams['font.family'] = "Inter"
 
 ## VOC palette
 # color_palette = {
