@@ -275,10 +275,15 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     #             "GV+RBDx", "GRY+RBDx", "GK+RBDx"]
 
     fig, ax = plt.subplots()
+
+    # plt.xticks(fontsize=9)
     stacks = ax.stackplot(
         index, *values, labels=labels, colors=list(color_palette_stacked.values()),
     )
-
+    
+    ax.tick_params(axis="x", which="major", labelsize=8)
+    
+    
     for stack, key in zip(stacks, color_palette_stacked.keys()):
         if key in to_hatch:
             stack.set_hatch("++")
@@ -287,23 +292,25 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     plt.yticks(
         ticks=np.arange(110, step=10), labels=y_ticks,
     )
-    plt.xticks(rotation=90)
+    
     ax.margins(y=0)
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + 0.2, box.width, box.height * 0.8])
     # Adjusted in April/May 2021.
     ax.legend(ncol=9, loc="lower center", 
              prop=dict(size=7),
-             bbox_to_anchor=(0.5, -0.45))
+             bbox_to_anchor=(0.55, -0.45))
     
     for item in [fig, ax]:
         item.patch.set_visible(False)
         
     # Added in April/May 2021.
-    ## Add another x-axis!
+    ## Add another y-axis!
     sns.despine(ax=ax, top=True, bottom=False, 
                 right=False, trim=True,
-                offset={"right": 75, "bottom":15})
+                offset={"right": 75, 
+                        "left": 75,
+                        "bottom":15})
     #ax.axvline(ax.get_xlim()[1]*0.9999, color='k',lw=2)
     ax.tick_params(labelbottom=True, labeltop=False, 
                     labelleft=True, labelright=True,
@@ -323,25 +330,35 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
     anno_labels = {
         "GK": "GK = Delta B.1.617+",
         "GRY": "GRY = Alpha B.1.1.7",
-        "GRA": "Includes B.1.1.529 and BA.x",
+        "GRA": "GRA = Omicron\n\nB.1.1.259\nand all descendants",
         "GR": "Includes Gamma P.1",
         "GH": "Includes Beta B.1.351\nand Epsilon B.1.429",
         "G": "Includes Eta B.1.525",
     }
     
-    anno_positions = {
-        "GK" : 0.5,
+    anno_positions_y = {
+        "GK" : 0.3,
         "GRA": 0.4,
-        "GRY": 0.3,
-        "GR" : 0.2,
-        "GH" : 0.1,
-        "G"  : 0,
+        "GRY": 0.2,
+        "GR" : 0.1,
+        "GH" : 0,
+        "G"  : 0
+    }
+    
+    anno_positions_x = {
+        "GK" : -0.135,
+        "GRA":  0.97,
+        "GRY": -0.135,
+        "GR" : -0.135,
+        "GH" : -0.135,
+        "G"  :  0.97
     }
     
     for clade in anno_labels.keys():
         ax.annotate(
             anno_labels[clade],
-            xy=(0.97, anno_positions[clade]), xycoords='axes fraction',
+            xy=(anno_positions_x[clade], anno_positions_y[clade]), 
+            xycoords='axes fraction',
             xytext=(0, 0), textcoords='offset points',
             fontsize=6,
             bbox=dict(boxstyle="round", 
@@ -350,9 +367,9 @@ def plot_stacked_area(index: pd.Index, labels: List, values: List, out: str):
         )
         
     ax.annotate('Small and/or Variable\nSample Sizes',
-        fontsize=8, color='#8da9db',
-        xy=(0.97, 0.22), xycoords='figure fraction',
-        xytext=(0.99, 0.22), textcoords='figure fraction',
+        fontsize=7, color='#8da9db',
+        xy=(1.02, 0.22), xycoords='figure fraction',
+        xytext=(1.2, 0.22), textcoords='figure fraction',
         arrowprops=dict(facecolor='#8da9db', 
                         edgecolor='#8da9db',
                         width=0.5),
